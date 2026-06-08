@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Colour Palette Extractor — Get Hex Colors from Image Free</title><meta name="description" content="Extract the exact hex colour palette from any image. Free tool for designers and brand teams."><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="shared.css">
+<style>.palette-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.color-chip{border-radius:var(--r8);overflow:hidden;border:1px solid var(--border);width:130px;flex-shrink:0}.chip-swatch{height:80px;display:flex;align-items:center;justify-content:center;font-size:20px}.chip-info{padding:8px 10px;background:var(--surface2)}.chip-hex{font-size:12px;font-weight:600;font-family:monospace;color:var(--text)}.chip-rgb{font-size:10px;color:var(--muted);margin-top:2px}.chip-copy{font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-top:4px;display:block}</style>
+</head>
+<body>
+<header class="header"><a href="/" class="logo"><div class="logo-icon">⚡</div>ImagePipeline Pro</a><nav class="nav"><a href="/">Home</a><a href="tool-resizer.html">Resizer</a><a href="tool-palette.html" class="active">Palette</a><a href="tool-exif.html">EXIF</a></nav></header>
+<div class="main">
+<div class="page-head"><div class="page-title">🎨 Colour Palette Extractor</div><div class="page-sub">Upload any image and extract its exact colour palette with hex codes. Perfect for designers and brand teams.</div></div>
+<div class="layout2">
+<div>
+<div class="card"><div class="card-title">Upload Image</div>
+<div class="dropzone" id="dz" onclick="document.getElementById('img-file').click()"><input type="file" id="img-file" accept="image/*" onchange="onFile(this)"><span class="dz-icon">🎨</span><p class="dz-text" id="dz-label">Drop image here or click to browse</p><span class="dz-sub">JPG, PNG, WebP</span></div>
+<img id="preview-img" style="display:none;width:100%;max-height:200px;object-fit:contain;margin-top:12px;border-radius:var(--r8);border:1px solid var(--border)" alt="preview">
+</div>
+<div class="card"><div class="card-title">Settings</div>
+<div class="field"><span class="label">Number of Colors — <span id="cnt-val">8</span></span><input type="range" id="color-count" min="3" max="16" value="8" oninput="document.getElementById('cnt-val').textContent=this.value"></div>
+<button class="btn" id="btn" onclick="extract()"><svg viewBox="0 0 16 16"><path d="M3 8h10M9 5l3 3-3 3"/></svg>Extract Palette</button>
+<div class="err" id="err" style="margin-top:8px"></div>
+</div></div>
+<div><div class="card" id="result-card" style="display:none">
+<div class="card-title">Extracted Palette</div>
+<div class="palette-grid" id="palette"></div>
+<button onclick="copyAll()" style="margin-top:14px;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r8);color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit">Copy all hex codes</button>
+</div>
+<div class="card" style="margin-top:16px"><div class="card-title">How to use</div>
+<p style="font-size:12px;color:var(--muted);line-height:1.8">• Upload a product photo, logo, or any image<br>• Get the exact hex codes of all dominant colors<br>• Click any color chip to copy its hex code<br>• Use for brand guidelines, website design, or print</p>
+</div></div></div></div>
+<footer class="footer">ImagePipeline Pro — <a href="/">All Tools</a></footer>
+<script src="shared.js"></script>
+<script>
+let currentColors=[];
+function onFile(inp){
+  if(!inp.files[0])return;
+  const url=URL.createObjectURL(inp.files[0]);
+  const img=document.getElementById('preview-img');img.src=url;img.style.display='block';
+  document.getElementById('dz').classList.add('has');document.getElementById('dz-label').textContent=inp.files[0].name;
+}
+['dragenter','dragover'].forEach(e=>document.getElementById('dz').addEventListener(e,ev=>{ev.preventDefault();document.getElementById('dz').classList.add('drag');}));
+['dragleave','drop'].forEach(e=>document.getElementById('dz').addEventListener(e,ev=>{ev.preventDefault();document.getElementById('dz').classList.remove('drag');if(e==='drop'&&ev.dataTransfer.files[0]){const f=ev.dataTransfer.files[0];document.getElementById('img-file').files;const dt=new DataTransfer();dt.items.add(f);document.getElementById('img-file').files=dt.files;onFile(document.getElementById('img-file'));}}));
+async function extract(){
+  const f=document.getElementById('img-file').files[0];
+  if(!f) return showErr('err','Please select an image.');
+  hideErr('err');setBtn('btn',true);
+  const fd=new FormData();fd.append('image',f);fd.append('count',document.getElementById('color-count').value);
+  try{
+    const res=await fetch('/palette',{method:'POST',body:fd});
+    const data=await res.json();
+    if(!res.ok) return showErr('err',data.error||'Error');
+    currentColors=data.colors;renderPalette(data.colors);
+    document.getElementById('result-card').style.display='block';
+  }catch(e){showErr('err','Connection error');}
+  setBtn('btn',false);
+}
+function renderPalette(colors){
+  const grid=document.getElementById('palette');grid.innerHTML='';
+  colors.forEach(c=>{
+    const chip=document.createElement('div');chip.className='color-chip';
+    chip.innerHTML=`<div class="chip-swatch" style="background:${c.hex}"><span style="font-size:24px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))">🎨</span></div><div class="chip-info"><div class="chip-hex">${c.hex}</div><div class="chip-rgb">rgb(${c.r}, ${c.g}, ${c.b})</div><button class="chip-copy" onclick="copyHex('${c.hex}',this)">Copy hex</button></div>`;
+    grid.appendChild(chip);
+  });
+}
+function copyHex(hex,btn){navigator.clipboard.writeText(hex).then(()=>{const orig=btn.textContent;btn.textContent='Copied!';setTimeout(()=>btn.textContent=orig,1500);});}
+function copyAll(){const all=currentColors.map(c=>c.hex).join(', ');navigator.clipboard.writeText(all).then(()=>alert('All colors copied: '+all));}
+</script></body></html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bulk Image Watermarker — Add Logo or Text Watermark Free</title><meta name="description" content="Add your logo or text watermark to hundreds of images at once. Free bulk watermark tool."><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="shared.css"></head>
+<body>
+<header class="header"><a href="/" class="logo"><div class="logo-icon">⚡</div>ImagePipeline Pro</a><nav class="nav"><a href="/">Home</a><a href="tool-resizer.html">Resizer</a><a href="tool-watermark.html" class="active">Watermark</a><a href="tool-palette.html">Palette</a></nav></header>
+<div class="main">
+<div class="page-head"><div class="page-title">🔏 Image Watermarker</div><div class="page-sub">Add your logo or text watermark to hundreds of images automatically.</div></div>
+<div class="layout2">
+<div>
+<div class="card"><div class="card-title">Upload Images</div>
+<div class="dropzone" id="dz" onclick="document.getElementById('files').click()"><input class="dz-input" type="file" id="files" multiple accept="image/*" onchange="onFiles(this)"><span class="dz-icon">🔏</span><p class="dz-text" id="dz-label">Drop images here or click</p><span class="dz-sub">JPG, PNG, WebP — up to 500 images</span></div></div>
+<div class="card"><div class="card-title">Watermark Type</div>
+<div class="tog-row"><span class="tog-label">Use Text Watermark instead of image</span><label class="sw"><input type="checkbox" id="text-mode" onchange="toggleMode()"><span class="sw-track"></span></label></div>
+<div id="logo-section">
+<div class="field" style="margin-top:10px"><span class="label">Watermark Logo (PNG)</span>
+<div class="dropzone" style="padding:14px" onclick="document.getElementById('wm-file').click()"><input type="file" id="wm-file" accept="image/png"><p id="wm-label" style="font-size:12px;margin:0;color:var(--muted)">Upload PNG logo (transparent bg recommended)</p></div></div>
+<div class="field"><span class="label">Logo Size — <span id="scale-val">20</span>% of image</span><input type="range" id="wm-scale" min="5" max="50" value="20" oninput="document.getElementById('scale-val').textContent=this.value"></div>
+</div>
+<div id="text-section" style="display:none">
+<div class="field" style="margin-top:10px"><span class="label">Watermark Text</span><input type="text" id="wm-text" placeholder="e.g. © YourBrand 2025" maxlength="60"></div>
+<div class="row2"><div class="field"><span class="label">Font Size</span><input type="number" id="wm-size" value="48" min="16" max="120"></div><div class="field"><span class="label">Color</span><input type="color" id="wm-color" value="#ffffff" style="width:100%;height:32px"></div></div>
+</div>
+<div class="field" style="margin-top:10px"><span class="label">Position</span>
+<select id="position"><option value="southeast">Bottom Right</option><option value="southwest">Bottom Left</option><option value="northeast">Top Right</option><option value="northwest">Top Left</option><option value="center">Center</option></select></div>
+<div class="field"><span class="label">Output Format</span><select id="fmt"><option value="same">Same as input</option><option value="webp">WebP</option><option value="jpeg">JPEG</option></select></div>
+</div></div>
+<div><div class="card">
+<button class="btn" id="btn" onclick="process()"><svg viewBox="0 0 16 16"><path d="M3 8h10M9 5l3 3-3 3"/></svg>Add Watermark</button>
+<div class="prog-wrap" id="prog"><div class="prog-bg"><div class="prog-bar" id="bar"></div></div><div class="prog-text" id="prog-text">Preparing...</div></div>
+<div class="summary" id="sum"><div class="sum-item"><span class="sum-val" id="s-imgs">—</span><span class="sum-key">Images processed</span></div></div>
+<div class="err" id="err"></div>
+</div>
+<div class="card" style="margin-top:16px"><div class="card-title">Tips</div>
+<p style="font-size:12px;color:var(--muted);line-height:1.8">• Use a <b style="color:var(--text)">PNG with transparent background</b> for logo watermarks<br>• White text on dark images, dark text on light images<br>• <b style="color:var(--text)">Bottom right</b> is the most common watermark position<br>• Text watermarks work great for copyright notices</p>
+</div></div></div></div>
+<footer class="footer">ImagePipeline Pro — <a href="/">All Tools</a></footer>
+<script src="shared.js"></script>
+<script>
+let files=[];
+function onFiles(inp){files=[...inp.files].filter(f=>/\.(jpe?g|png|webp)$/i.test(f.name));document.getElementById('dz').classList.add('has');document.getElementById('dz-label').textContent=`${files.length} images ready`;}
+document.getElementById('wm-file').addEventListener('change',function(){document.getElementById('wm-label').textContent=this.files[0]?this.files[0].name:'No file selected';document.getElementById('wm-label').style.color='var(--success)';});
+['dragenter','dragover'].forEach(e=>document.getElementById('dz').addEventListener(e,ev=>{ev.preventDefault();document.getElementById('dz').classList.add('drag');}));
+['dragleave','drop'].forEach(e=>document.getElementById('dz').addEventListener(e,ev=>{ev.preventDefault();document.getElementById('dz').classList.remove('drag');if(e==='drop'){files=[...ev.dataTransfer.files].filter(f=>/\.(jpe?g|png|webp)$/i.test(f.name));if(files.length){document.getElementById('dz').classList.add('has');document.getElementById('dz-label').textContent=`${files.length} images ready`;}}}));
+function toggleMode(){const t=document.getElementById('text-mode').checked;document.getElementById('logo-section').style.display=t?'none':'block';document.getElementById('text-section').style.display=t?'block':'none';}
+async function process(){
+  if(!files.length) return showErr('err','Please select images.');
+  const textMode=document.getElementById('text-mode').checked;
+  if(!textMode&&!document.getElementById('wm-file').files[0]) return showErr('err','Please upload a watermark logo or enable text mode.');
+  hideErr('err');setBtn('btn',true);document.getElementById('sum').classList.remove('vis');document.getElementById('prog').classList.add('vis');document.getElementById('bar').style.width='0';
+  const jobId='wm-'+Date.now();
+  listenSSE(jobId,'bar','prog-text',d=>{document.getElementById('s-imgs').textContent=d.total;document.getElementById('sum').classList.add('vis');setBtn('btn',false);});
+  const fd=new FormData();fd.append('jobId',jobId);fd.append('position',document.getElementById('position').value);fd.append('scale',document.getElementById('wm-scale').value/100);fd.append('format',document.getElementById('fmt').value);fd.append('quality','90');fd.append('textMode',textMode);
+  if(textMode){fd.append('wmText',document.getElementById('wm-text').value);fd.append('wmSize',document.getElementById('wm-size').value);fd.append('wmColor',document.getElementById('wm-color').value);}
+  else{fd.append('watermark',document.getElementById('wm-file').files[0]);}
+  files.forEach(f=>fd.append('images',f));
+  try{const res=await fetch('/watermark',{method:'POST',body:fd});if(res.ok){triggerDownload(await res.blob(),'watermarked_images.zip');}else{const e=await res.json().catch(()=>({}));showErr('err',e.error||'Error');setBtn('btn',false);}}catch(e){showErr('err','Connection error');setBtn('btn',false);}
+}
+</script></body></html>

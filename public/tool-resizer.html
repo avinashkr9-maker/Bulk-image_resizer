@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImagePipeline Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D1117;--surface:#161B22;--surface2:#21262D;--border:#30363D;--border2:#3D444D;
+  --accent:#7C6FF7;--accent-dim:rgba(124,111,247,0.12);--accent-hover:#8B7FF8;
+  --success:#3FB950;--success-dim:rgba(63,185,80,0.1);
+  --warn:#E3B341;--danger:#F85149;
+  --text:#E6EDF3;--muted:#8B949E;--hint:#484F58;
+  --r4:4px;--r8:8px;--r12:12px;--r16:16px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;line-height:1.5}
+
+/* ── HEADER ── */
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(13,17,23,0.95);backdrop-filter:blur(12px);z-index:100}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;color:var(--text)}
+.logo-icon{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.header-tabs{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r8);padding:3px}
+.htab{padding:6px 16px;border-radius:6px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.htab.active{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.header-right{display:flex;align-items:center;gap:8px}
+.hbtn{padding:6px 12px;border-radius:var(--r8);border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:.2s;display:flex;align-items:center;gap:6px}
+.hbtn:hover{border-color:var(--border2);color:var(--text)}
+.hbtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:calc(100vh - 57px)}
+.sidebar{width:280px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:20px 0}
+.main{flex:1;overflow-y:auto;padding:24px 28px}
+.panel{display:none}.panel.active{display:block}
+
+/* ── SIDEBAR ── */
+.sidebar-section{padding:0 16px 20px}
+.sidebar-section+.sidebar-section{border-top:1px solid var(--border);padding-top:20px}
+.sidebar-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--hint);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.sidebar-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── FORM ── */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+input[type=number],input[type=text],select,textarea{width:100%;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r8);color:var(--text);font-family:'Inter',sans-serif;font-size:12px;outline:none;transition:.15s}
+input[type=number]:focus,input[type=text]:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+select option{background:var(--surface2)}
+input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer;height:4px}
+input[type=file]{display:none}
+input[type=color]{width:32px;height:32px;border:1px solid var(--border);border-radius:var(--r4);cursor:pointer;background:none;padding:2px;flex-shrink:0}
+
+.row2{display:flex;gap:8px}
+.row2 .field{flex:1;margin-bottom:0}
+
+/* ── TOGGLE ── */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:var(--r8);border:1px solid var(--border);margin-bottom:8px}
+.toggle-row:last-child{margin-bottom:0}
+.toggle-label{font-size:12px;color:var(--text);display:flex;align-items:center;gap:7px}
+.toggle-label svg{width:13px;height:13px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sw{position:relative;width:34px;height:18px;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0}
+.sw-track{position:absolute;inset:0;background:var(--border2);border-radius:18px;cursor:pointer;transition:.2s}
+.sw-track::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.2s}
+.sw input:checked+.sw-track{background:var(--accent)}
+.sw input:checked+.sw-track::before{transform:translateX(16px);background:#fff}
+
+/* ── SLIDER ROW ── */
+.slider-row{display:flex;align-items:center;gap:10px}
+.slider-val{font-size:12px;font-weight:500;color:var(--text);min-width:38px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ── SECTION CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r12);padding:16px;margin-bottom:16px}
+.card:last-child{margin-bottom:0}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px}
+.card-title svg{width:15px;height:15px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.card-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500}
+.badge-opt{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.badge-new{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(124,111,247,.25)}
+
+/* ── PRESETS ── */
+.preset-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.preset-btn{padding:7px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r8);color:var(--muted);font-size:10px;cursor:pointer;transition:.15s;font-family:'Inter',sans-serif;text-align:center;line-height:1.4}
+.preset-btn strong{display:block;color:var(--text);font-size:11px;font-weight:500}
+.preset-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.preset-btn.active{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+
+/* ── DROP ZONE ── */
+.dropzone{border:1.5px dashed var(--border2);border-radius:var(--r12);padding:28px 20px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.dropzone:hover,.dropzone.drag-over{border-color:var(--accent);background:var(--accent-dim)}
+.dropzone svg{width:32px;height:32px;stroke:var(--hint);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:10px}
+.dropzone:hover svg,.dropzone.drag-over svg{stroke:var(--accent)}
+.dropzone p{font-size:13px;color:var(--muted);margin-bottom:4px}
+.dropzone span{font-size:11px;color:var(--hint)}
+.dropzone.has-files{border-color:var(--success);background:var(--success-dim)}
+.dropzone.has-files svg{stroke:var(--success)}
+.dropzone.has-files p{color:var(--success)}
+.dz-input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+/* ── IMAGE GRID ── */
+.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:14px;max-height:280px;overflow-y:auto;padding-right:4px}
+.img-grid::-webkit-scrollbar{width:4px}
+.img-grid::-webkit-scrollbar-track{background:transparent}
+.img-grid::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.img-thumb{position:relative;border-radius:var(--r8);overflow:hidden;background:var(--surface2);border:1px solid var(--border);aspect-ratio:1;cursor:pointer;transition:.15s}
+.img-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.img-thumb .name{position:absolute;bottom:0;left:0;right:0;padding:4px 5px;background:rgba(0,0,0,.6);font-size:9px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.img-thumb .remove{position:absolute;top:4px;right:4px;width:18px;height:18px;background:rgba(0,0,0,.7);border-radius:50%;display:none;align-items:center;justify-content:center;color:#fff;font-size:11px;line-height:1}
+.img-thumb:hover .remove{display:flex}
+.img-thumb.deselected{opacity:.35}
+.img-thumb.deselected::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.4)}
+.grid-info{font-size:11px;color:var(--muted);margin-top:8px;display:flex;align-items:center;justify-content:space-between}
+.grid-info button{font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:0}
+
+/* ── PREVIEW ── */
+.preview-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.preview-box{display:flex;flex-direction:column;gap:5px}
+.preview-box span{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--hint)}
+.preview-box img,.preview-box canvas{width:100%;height:110px;object-fit:contain;background:var(--surface2);border-radius:var(--r8);border:1px solid var(--border)}
+
+/* ── ACTION BUTTON ── */
+.action-btn{width:100%;padding:11px;background:var(--accent);border:none;border-radius:var(--r8);color:#fff;font-weight:600;font-size:13px;cursor:pointer;transition:.15s;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
+.action-btn svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.action-btn:hover{background:var(--accent-hover)}
+.action-btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── PROGRESS ── */
+.progress-wrap{display:none;flex-direction:column;gap:6px;margin-top:12px}
+.progress-wrap.vis{display:flex}
+.prog-bar-bg{height:4px;background:var(--border);border-radius:4px;overflow:hidden}
+.prog-bar{height:100%;background:var(--accent);border-radius:4px;transition:width .35s ease;width:0}
+.prog-text{font-size:11px;color:var(--muted)}
+
+/* ── SUMMARY ── */
+.summary{display:none;background:var(--success-dim);border:1px solid rgba(63,185,80,.2);border-radius:var(--r8);padding:12px 14px;gap:16px;flex-wrap:wrap;margin-top:12px}
+.summary.vis{display:flex}
+.sum-item{display:flex;flex-direction:column;gap:2px}
+.sum-val{font-size:16px;font-weight:600;color:var(--success)}
+.sum-key{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+
+/* ── HISTORY ── */
+.history-list{display:flex;flex-direction:column;gap:6px}
+.hist-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r8);padding:10px 12px;cursor:pointer;transition:.15s}
+.hist-item:hover{border-color:var(--border2)}
+.hist-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.hist-name{font-size:12px;font-weight:500;color:var(--text)}
+.hist-time{font-size:10px;color:var(--hint)}
+.hist-meta{font-size:11px;color:var(--muted)}
+.hist-load{font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;padding:0}
+.hist-empty{font-size:12px;color:var(--hint);text-align:center;padding:12px 0}
+
+/* ── PROFILES ── */
+.profile-bar{display:flex;gap:6px;align-items:center;margin-bottom:12px}
+.profile-bar select{flex:1}
+.profile-bar button{padding:6px 10px;border-radius:var(--r8);border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:.15s}
+.profile-bar button:hover{color:var(--text);border-color:var(--border2)}
+
+/* ── COLOR ROW ── */
+.color-row{display:flex;gap:8px;align-items:center}
+.color-hex{flex:1;font-family:monospace;font-size:12px}
+
+/* ── CANVAS STUDIO ── */
+.studio-layout{display:grid;grid-template-columns:1fr 400px;gap:20px;align-items:start}
+.canvas-wrap{position:relative;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r12);overflow:hidden;aspect-ratio:1}
+.canvas-wrap canvas{position:absolute;inset:0;width:100%;height:100%;cursor:grab}
+.canvas-wrap canvas:active{cursor:grabbing}
+.guide-line{position:absolute;pointer-events:none}
+.gl-v{width:1px;height:100%;left:50%;border-left:1px solid rgba(124,111,247,.35)}
+.gl-h1{width:100%;height:1px;top:25%;border-top:1px dashed rgba(63,185,80,.4)}
+.gl-h2{width:100%;height:1px;top:80%;border-top:1px dashed rgba(63,185,80,.4)}
+.canvas-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:var(--muted);font-size:10px;padding:4px 10px;border-radius:20px;pointer-events:none;white-space:nowrap}
+
+/* ── ERR ── */
+.err-msg{font-size:11px;color:var(--danger);margin-top:8px;display:none}
+.err-msg.vis{display:block}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+/* ── PAGE HEADER ── */
+.page-head{margin-bottom:24px}
+.page-title{font-size:18px;font-weight:600;color:var(--text);margin-bottom:4px}
+.page-sub{font-size:12px;color:var(--muted)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+    </div>
+    ImagePipeline Pro
+  </div>
+  <div class="header-tabs">
+    <button class="htab active" onclick="switchTab('auto',this)">Batch Resize</button>
+    <button class="htab" onclick="switchTab('studio',this)">Canvas Studio</button>
+    <button class="htab" onclick="switchTab('history',this)">History</button>
+  </div>
+  <div class="header-right">
+    <button class="hbtn" onclick="saveProfile()">
+      <svg viewBox="0 0 16 16"><path d="M13 13H3V3l3-1h6l1 1v10z"/><rect x="5" y="8" width="6" height="5"/><rect x="5" y="2" width="4" height="3"/></svg>
+      Save Profile
+    </button>
+  </div>
+</header>
+
+<div class="app">
+
+<!-- ══ SIDEBAR — GLOBAL SETTINGS ══ -->
+<aside class="sidebar">
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Export</div>
+
+    <div class="field">
+      <span class="label">Format</span>
+      <select id="g-format">
+        <option value="webp">WebP — best compression</option>
+        <option value="jpeg">JPEG — universal</option>
+        <option value="png">PNG — lossless</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <span class="label">Quality — <span id="g-quality-val">90</span>%</span>
+      <input type="range" id="g-quality" min="50" max="100" step="1" value="90" oninput="document.getElementById('g-quality-val').textContent=this.value">
+    </div>
+
+    <div class="field">
+      <span class="label">Canvas Background</span>
+      <div class="color-row">
+        <input type="color" id="g-bgcolor" value="#ffffff" oninput="syncHex(this.value)">
+        <input type="text" class="color-hex" id="g-bgcolor-hex" value="#ffffff" maxlength="7" oninput="syncPicker(this.value)" placeholder="#ffffff">
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="label">Watermark (.png)</span>
+      <label class="dropzone" style="padding:12px;text-align:left" id="wm-zone">
+        <input type="file" id="g-watermark" accept="image/png" onchange="updateWmLabel(this)">
+        <p id="wm-label" style="font-size:12px;margin:0">No watermark selected</p>
+      </label>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Processing</div>
+    <div class="toggle-row">
+      <span class="toggle-label">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+        Multi-Resolution Output
+      </span>
+      <label class="sw"><input type="checkbox" id="g-multires"><span class="sw-track"></span></label>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">
+        <svg viewBox="0 0 16 16"><path d="M3 8h10M8 3v10"/></svg>
+        Micro-Sharpening
+      </span>
+      <label class="sw"><input type="checkbox" id="g-sharpen" checked><span class="sw-track"></span></label>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">
+        <svg viewBox="0 0 16 16"><path d="M2 4h12M4 8h8M6 12h4"/></svg>
+        Generate Magento CSV
+      </span>
+      <label class="sw"><input type="checkbox" id="g-csv"><span class="sw-track"></span></label>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Color Correction</div>
+    <div class="field">
+      <span class="label">Brightness — <span id="br-val">1.00</span></span>
+      <input type="range" id="g-brightness" min="0.5" max="2" step="0.05" value="1" oninput="document.getElementById('br-val').textContent=parseFloat(this.value).toFixed(2);if(previewImg.src)renderPreview()">
+    </div>
+    <div class="field">
+      <span class="label">Saturation — <span id="sat-val">1.00</span></span>
+      <input type="range" id="g-saturation" min="0" max="2" step="0.05" value="1" oninput="document.getElementById('sat-val').textContent=parseFloat(this.value).toFixed(2)">
+    </div>
+    <div class="field">
+      <span class="label">Hue Shift — <span id="hue-val">0</span>°</span>
+      <input type="range" id="g-hue" min="-180" max="180" step="1" value="0" oninput="document.getElementById('hue-val').textContent=this.value">
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Text Overlay</div>
+    <div class="field">
+      <span class="label">Text</span>
+      <input type="text" id="g-overlay-text" placeholder="e.g. SALE or SKU-001" maxlength="60">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <span class="label">Font Size</span>
+        <input type="number" id="g-overlay-size" value="32" min="12" max="120">
+      </div>
+      <div class="field">
+        <span class="label">Color</span>
+        <input type="color" id="g-overlay-color" value="#ffffff" style="width:100%;height:32px">
+      </div>
+    </div>
+    <div class="field">
+      <span class="label">Position</span>
+      <select id="g-overlay-pos">
+        <option value="bottom-right">Bottom Right</option>
+        <option value="bottom-left">Bottom Left</option>
+        <option value="top-right">Top Right</option>
+        <option value="top-left">Top Left</option>
+        <option value="center">Center</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Profiles</div>
+    <div class="profile-bar">
+      <select id="profile-select"><option value="">— Load a profile —</option></select>
+      <button onclick="loadProfile()">Load</button>
+      <button onclick="deleteProfile()" style="color:var(--danger)">Del</button>
+    </div>
+    <p style="font-size:10px;color:var(--hint)">Profiles save all sidebar settings for quick reuse.</p>
+  </div>
+
+</aside>
+
+<!-- ══ MAIN CONTENT ══ -->
+<main class="main">
+
+  <!-- ══ BATCH RESIZE TAB ══ -->
+  <div id="panel-auto" class="panel active">
+    <div class="page-head">
+      <div class="page-title">Batch Resize</div>
+      <div class="page-sub">Upload a folder, choose settings, download processed ZIP</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+
+      <!-- LEFT COL -->
+      <div>
+        <!-- Platform Presets -->
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <svg viewBox="0 0 16 16"><path d="M2 2h12v12H2z"/><path d="M6 2v12M10 2v12M2 6h12M2 10h12"/></svg>
+              Platform Presets
+            </span>
+          </div>
+          <div class="preset-grid" id="preset-grid">
+            <button class="preset-btn" onclick="setPreset(2000,2000,this)"><strong>Amazon</strong>2000×2000</button>
+            <button class="preset-btn" onclick="setPreset(2048,2048,this)"><strong>Shopify</strong>2048×2048</button>
+            <button class="preset-btn" onclick="setPreset(1080,1080,this)"><strong>Instagram</strong>1080×1080</button>
+            <button class="preset-btn" onclick="setPreset(1080,1920,this)"><strong>IG Story</strong>1080×1920</button>
+            <button class="preset-btn" onclick="setPreset(1600,1600,this)"><strong>eBay</strong>1600×1600</button>
+            <button class="preset-btn" onclick="setPreset(800,800,this)"><strong>Thumbnail</strong>800×800</button>
+          </div>
+        </div>
+
+        <!-- Dimensions & Mode -->
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <svg viewBox="0 0 16 16"><path d="M2 14V2h12v12H2z"/><path d="M6 14V10M10 14V6M2 10h4M2 6h8"/></svg>
+              Output Settings
+            </span>
+          </div>
+          <div class="row2" style="margin-bottom:12px">
+            <div class="field"><span class="label">Width (px)</span><input type="number" id="auto-w" value="1080" oninput="renderPreview()"></div>
+            <div class="field"><span class="label">Height (px)</span><input type="number" id="auto-h" value="1080" oninput="renderPreview()"></div>
+          </div>
+          <div class="field" style="margin-bottom:12px">
+            <span class="label">Fit Mode</span>
+            <select id="auto-fit" onchange="renderPreview()">
+              <option value="contain">Contain — letterbox with bg color</option>
+              <option value="cover">Cover — zoom & crop to fill</option>
+              <option value="fill">Fill — stretch to exact size</option>
+              <option value="inside">Inside — shrink only</option>
+              <option value="outside">Outside — enlarge only</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:12px">
+            <span class="label">Gravity / Alignment</span>
+            <select id="auto-gravity">
+              <option value="center">Center</option>
+              <option value="north">Top</option>
+              <option value="south">Bottom</option>
+              <option value="west">Left</option>
+              <option value="east">Right</option>
+              <option value="entropy">Smart (Entropy)</option>
+              <option value="attention">Smart (Attention)</option>
+            </select>
+          </div>
+          <div class="toggle-row">
+            <span class="toggle-label">Mirror Image</span>
+            <label class="sw"><input type="checkbox" id="auto-flip"><span class="sw-track"></span></label>
+          </div>
+        </div>
+
+        <!-- CSV Rename -->
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <svg viewBox="0 0 16 16"><path d="M3 2h10l1 4H2L3 2z"/><path d="M2 6v8h12V6"/><path d="M6 10h4"/></svg>
+              CSV Rename Mapping
+            </span>
+            <span class="card-badge badge-opt">Optional</span>
+          </div>
+          <div class="field" style="margin-bottom:8px">
+            <span class="label">Upload CSV (original,new_name)</span>
+            <label class="dropzone" style="padding:10px">
+              <input type="file" id="rename-csv" accept=".csv" onchange="parseCSV(this)">
+              <p id="csv-label" style="font-size:12px;margin:0;color:var(--muted)">Drop rename.csv here</p>
+            </label>
+          </div>
+          <p id="csv-count" style="font-size:11px;color:var(--hint)"></p>
+        </div>
+      </div>
+
+      <!-- RIGHT COL -->
+      <div>
+        <!-- Drop Zone -->
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">
+              <svg viewBox="0 0 16 16"><path d="M2 10v4h12v-4"/><path d="M8 2v8M5 5l3-3 3 3"/></svg>
+              Upload Images
+            </span>
+          </div>
+
+          <div class="dropzone" id="auto-dropzone" onclick="document.getElementById('auto-files').click()">
+            <input class="dz-input" type="file" id="auto-files" webkitdirectory directory multiple accept="image/*" onchange="handleFiles(this.files)">
+            <svg viewBox="0 0 32 32"><path d="M4 20v8h24v-8"/><path d="M16 4v16M10 10l6-6 6 6"/><circle cx="8" cy="24" r="1.5"/></svg>
+            <p id="dz-label">Drop folder here or click to browse</p>
+            <span id="dz-sub">JPG, PNG, WebP supported</span>
+          </div>
+
+          <div id="img-grid-wrap" style="display:none">
+            <div class="img-grid" id="img-grid"></div>
+            <div class="grid-info">
+              <span id="grid-count"></span>
+              <button onclick="selectAll()">Select All</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Preview -->
+        <div class="card" id="preview-card" style="display:none">
+          <div class="card-head">
+            <span class="card-title">
+              <svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1"/><path d="M1 10l4-4 3 3 3-4 4 5"/></svg>
+              Live Preview
+            </span>
+            <span style="font-size:10px;color:var(--hint)">Simulated — first image</span>
+          </div>
+          <div class="preview-pair">
+            <div class="preview-box"><span>Original</span><img id="prev-before" src="" alt=""></div>
+            <div class="preview-box"><span>Output</span><canvas id="prev-after"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Process Button -->
+        <div class="card">
+          <button class="action-btn" id="btn-auto">
+            <svg viewBox="0 0 16 16"><path d="M3 8h10M9 5l3 3-3 3"/></svg>
+            Process Batch
+          </button>
+          <div class="progress-wrap" id="auto-prog">
+            <div class="prog-bar-bg"><div class="prog-bar" id="auto-bar"></div></div>
+            <div class="prog-text" id="auto-prog-text">Preparing...</div>
+          </div>
+          <div class="summary" id="auto-sum">
+            <div class="sum-item"><span class="sum-val" id="s-imgs">—</span><span class="sum-key">Images</span></div>
+            <div class="sum-item"><span class="sum-val" id="s-files">—</span><span class="sum-key">Files</span></div>
+            <div class="sum-item"><span class="sum-val" id="s-size">—</span><span class="sum-key">Output Size</span></div>
+            <div class="sum-item"><span class="sum-val" id="s-fmt">—</span><span class="sum-key">Format</span></div>
+          </div>
+          <div class="err-msg" id="auto-err"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CANVAS STUDIO TAB ══ -->
+  <div id="panel-studio" class="panel">
+    <div class="page-head">
+      <div class="page-title">Canvas Studio</div>
+      <div class="page-sub">Position one reference image precisely, apply layout to all images in a folder</div>
+    </div>
+
+    <div class="studio-layout">
+      <div class="canvas-wrap" id="canvas-wrap">
+        <canvas id="studioCanvas"></canvas>
+        <div class="guide-line gl-v"></div>
+        <div class="guide-line gl-h1"></div>
+        <div class="guide-line gl-h2"></div>
+        <div class="canvas-hint">Drag to position · Scroll to scale</div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Reference Image</span></div>
+          <div class="dropzone" onclick="document.getElementById('ref-image').click()" style="margin-bottom:0">
+            <input type="file" id="ref-image" accept="image/*" onchange="loadReference(this)">
+            <svg viewBox="0 0 32 32" style="width:24px;height:24px;margin-bottom:6px"><rect x="2" y="6" width="28" height="20" rx="2"/><circle cx="10" cy="13" r="3"/><path d="M2 22l7-7 5 5 4-4 10 10"/></svg>
+            <p id="ref-label" style="font-size:12px;margin:0">Load reference image</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="card-title">Scale & Position</span></div>
+          <div class="field">
+            <span class="label">Scale — <span id="scale-val">1.00</span>×</span>
+            <input type="range" id="st-scale" min="0.05" max="4" step="0.01" value="1" oninput="stState.scale=parseFloat(this.value);document.getElementById('scale-val').textContent=stState.scale.toFixed(2);draw()">
+          </div>
+          <div class="row2">
+            <div class="field"><span class="label">Output W</span><input type="number" id="tmpl-w" value="1080"></div>
+            <div class="field"><span class="label">Output H</span><input type="number" id="tmpl-h" value="1080"></div>
+          </div>
+          <div class="field" style="margin-top:4px">
+            <span class="label">Format</span>
+            <select id="tmpl-format">
+              <option value="webp">WebP</option>
+              <option value="jpeg">JPEG</option>
+              <option value="png">PNG</option>
+            </select>
+          </div>
+          <div class="toggle-row" style="margin-top:8px">
+            <span class="toggle-label">Mirror Template</span>
+            <label class="sw"><input type="checkbox" id="tmpl-flip" onchange="draw()"><span class="sw-track"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="card-title">Apply to Folder</span></div>
+          <div class="dropzone" onclick="document.getElementById('tmpl-files').click()" style="padding:14px;margin-bottom:12px">
+            <input type="file" id="tmpl-files" webkitdirectory directory multiple accept="image/*" onchange="updateTmplLabel(this)">
+            <p id="tmpl-label" style="font-size:12px;margin:0;color:var(--muted)">Select target folder</p>
+          </div>
+          <button class="action-btn" id="btn-tmpl">
+            <svg viewBox="0 0 16 16"><path d="M3 8h10M9 5l3 3-3 3"/></svg>
+            Render Batch
+          </button>
+          <div class="progress-wrap" id="tmpl-prog">
+            <div class="prog-bar-bg"><div class="prog-bar" id="tmpl-bar"></div></div>
+            <div class="prog-text" id="tmpl-prog-text">Preparing...</div>
+          </div>
+          <div class="summary" id="tmpl-sum">
+            <div class="sum-item"><span class="sum-val" id="ts-imgs">—</span><span class="sum-key">Images</span></div>
+            <div class="sum-item"><span class="sum-val" id="ts-files">—</span><span class="sum-key">Files</span></div>
+            <div class="sum-item"><span class="sum-val" id="ts-size">—</span><span class="sum-key">Output</span></div>
+            <div class="sum-item"><span class="sum-val" id="ts-fmt">—</span><span class="sum-key">Format</span></div>
+          </div>
+          <div class="err-msg" id="tmpl-err"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ HISTORY TAB ══ -->
+  <div id="panel-history" class="panel">
+    <div class="page-head">
+      <div class="page-title">Job History</div>
+      <div class="page-sub">Last 5 processing jobs. Click any job to restore its settings.</div>
+    </div>
+    <div class="card" style="max-width:680px">
+      <div id="history-list" class="history-list">
+        <p class="hist-empty">No jobs yet. Process a batch to see history here.</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+// ── Tab switcher ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.htab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+// ── Color sync ──
+function syncHex(v) { document.getElementById('g-bgcolor-hex').value = v; if(previewImg.src) renderPreview(); }
+function syncPicker(v) { if(/^#[0-9a-fA-F]{6}$/.test(v)) { document.getElementById('g-bgcolor').value = v; if(previewImg.src) renderPreview(); } }
+
+// ── Watermark label ──
+function updateWmLabel(inp) {
+  const el = document.getElementById('wm-label');
+  el.style.color = inp.files.length ? 'var(--success)' : 'var(--muted)';
+  el.textContent = inp.files.length ? inp.files[0].name : 'No watermark selected';
+}
+
+// ── Preset buttons ──
+function setPreset(w, h, btn) {
+  document.getElementById('auto-w').value = w;
+  document.getElementById('auto-h').value = h;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPreview();
+}
+
+// ── CSV Rename parsing ──
+let renameMap = {};
+function parseCSV(inp) {
+  if (!inp.files.length) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n').filter(l => l.trim());
+    renameMap = {};
+    lines.forEach(l => {
+      const parts = l.split(',');
+      if (parts.length >= 2) renameMap[parts[0].trim()] = parts[1].trim().replace(/\.[^.]+$/,'');
+    });
+    const count = Object.keys(renameMap).length;
+    document.getElementById('csv-label').textContent = inp.files[0].name;
+    document.getElementById('csv-label').style.color = 'var(--success)';
+    document.getElementById('csv-count').textContent = `${count} rename rule${count !== 1 ? 's' : ''} loaded`;
+  };
+  reader.readAsText(inp.files[0]);
+}
+
+// ── Image grid / drag-drop ──
+let selectedFiles = [];
+let deselected = new Set();
+
+const dropzone = document.getElementById('auto-dropzone');
+['dragenter','dragover'].forEach(e => dropzone.addEventListener(e, ev => { ev.preventDefault(); dropzone.classList.add('drag-over'); }));
+['dragleave','drop'].forEach(e => dropzone.addEventListener(e, ev => { ev.preventDefault(); dropzone.classList.remove('drag-over'); }));
+dropzone.addEventListener('drop', ev => {
+  const items = ev.dataTransfer.items;
+  const files = [];
+  for (const item of items) {
+    const entry = item.webkitGetAsEntry && item.webkitGetAsEntry();
+    if (entry && entry.isDirectory) readDir(entry, files, () => handleFiles(files));
+    else if (item.kind === 'file') files.push(item.getAsFile());
+  }
+  if (files.length) handleFiles(files);
+});
+
+function readDir(dirEntry, fileArr, done) {
+  const reader = dirEntry.createReader();
+  reader.readEntries(entries => {
+    let pending = entries.length;
+    if (!pending) return done();
+    entries.forEach(e => {
+      if (e.isFile) e.file(f => { fileArr.push(f); if (!--pending) done(); });
+      else if (e.isDirectory) readDir(e, fileArr, () => { if (!--pending) done(); });
+      else if (!--pending) done();
+    });
+  });
+}
+
+const validExts = ['.jpg','.jpeg','.png','.webp'];
+function handleFiles(files) {
+  const arr = Array.from(files).filter(f => validExts.some(e => f.name.toLowerCase().endsWith(e)));
+  if (!arr.length) return;
+  selectedFiles = arr;
+  deselected.clear();
+  buildGrid(arr);
+  loadPreview(arr);
+
+  const dz = document.getElementById('auto-dropzone');
+  dz.classList.add('has-files');
+  document.getElementById('dz-label').textContent = `${arr.length} image${arr.length !== 1 ? 's' : ''} ready`;
+  document.getElementById('dz-sub').textContent = 'Click or drop to replace';
+}
+
+function buildGrid(files) {
+  const grid = document.getElementById('img-grid');
+  const wrap = document.getElementById('img-grid-wrap');
+  grid.innerHTML = '';
+  wrap.style.display = 'block';
+
+  files.forEach((f, i) => {
+    const url = URL.createObjectURL(f);
+    const div = document.createElement('div');
+    div.className = 'img-thumb';
+    div.dataset.index = i;
+    div.innerHTML = `<img src="${url}" alt=""><div class="name">${f.name}</div><div class="remove" onclick="toggleImg(${i},event)">×</div>`;
+    div.onclick = () => toggleImg(i, null, div);
+    grid.appendChild(div);
+  });
+  updateGridCount();
+}
+
+function toggleImg(i, ev, div) {
+  if (ev) ev.stopPropagation();
+  div = div || document.querySelector(`.img-thumb[data-index="${i}"]`);
+  if (deselected.has(i)) deselected.delete(i);
+  else deselected.add(i);
+  div.classList.toggle('deselected', deselected.has(i));
+  updateGridCount();
+}
+
+function selectAll() { deselected.clear(); document.querySelectorAll('.img-thumb').forEach(t => t.classList.remove('deselected')); updateGridCount(); }
+
+function updateGridCount() {
+  const active = selectedFiles.length - deselected.size;
+  document.getElementById('grid-count').textContent = `${active} of ${selectedFiles.length} selected`;
+}
+
+// ── Live preview ──
+const previewImg = new Image();
+function loadPreview(files) {
+  const first = Array.isArray(files) ? files[0] : files;
+  if (!first) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    previewImg.src = e.target.result;
+    previewImg.onload = () => {
+      document.getElementById('prev-before').src = e.target.result;
+      renderPreview();
+      document.getElementById('preview-card').style.display = 'block';
+    };
+  };
+  reader.readAsDataURL(first);
+}
+
+function renderPreview() {
+  if (!previewImg.src) return;
+  const c = document.getElementById('prev-after');
+  const ctx = c.getContext('2d');
+  const tw = parseInt(document.getElementById('auto-w').value) || 1080;
+  const th = parseInt(document.getElementById('auto-h').value) || 1080;
+  const fit = document.getElementById('auto-fit').value;
+  const bg = document.getElementById('g-bgcolor').value;
+
+  c.width = 220; c.height = 110;
+  const sc = Math.min(c.width/tw, c.height/th);
+  const cw = tw*sc, ch = th*sc;
+  const ox = (c.width-cw)/2, oy = (c.height-ch)/2;
+
+  ctx.fillStyle = bg;
+  ctx.fillRect(ox, oy, cw, ch);
+  const iw = previewImg.naturalWidth, ih = previewImg.naturalHeight;
+  let dw, dh, dx, dy;
+  if (fit === 'contain' || fit === 'inside') {
+    const s = Math.min(cw/iw, ch/ih);
+    dw=iw*s; dh=ih*s; dx=ox+(cw-dw)/2; dy=oy+(ch-dh)/2;
+  } else { dw=cw; dh=ch; dx=ox; dy=oy; }
+  ctx.drawImage(previewImg, dx, dy, dw, dh);
+}
+
+document.getElementById('g-bgcolor').addEventListener('input', renderPreview);
+
+// ── Global settings builder ──
+function buildFormData(fd) {
+  fd.append('multiRes', document.getElementById('g-multires').checked);
+  fd.append('sharpen',  document.getElementById('g-sharpen').checked);
+  fd.append('csv',      document.getElementById('g-csv').checked);
+  fd.append('quality',  document.getElementById('g-quality').value);
+  fd.append('bgColor',  document.getElementById('g-bgcolor').value);
+  fd.append('format',   document.getElementById('g-format').value);
+  fd.append('brightness', document.getElementById('g-brightness').value);
+  fd.append('saturation', document.getElementById('g-saturation').value);
+  fd.append('hue',        document.getElementById('g-hue').value);
+  fd.append('overlayText',  document.getElementById('g-overlay-text').value);
+  fd.append('overlaySize',  document.getElementById('g-overlay-size').value);
+  fd.append('overlayColor', document.getElementById('g-overlay-color').value);
+  fd.append('overlayPos',   document.getElementById('g-overlay-pos').value);
+  fd.append('renameMap', JSON.stringify(renameMap));
+  const wm = document.getElementById('g-watermark').files[0];
+  if (wm) fd.append('watermark', wm);
+}
+
+// ── SSE listener ──
+function listenSSE(jobId, barId, textId, sumPrefix, btn, onDone) {
+  const es = new EventSource(`/progress/${jobId}`);
+  es.onmessage = e => {
+    const d = JSON.parse(e.data);
+    if (d.done) {
+      document.getElementById(barId).style.width = '100%';
+      document.getElementById(textId).textContent = `Done — ${d.total} images processed`;
+      document.getElementById(sumPrefix+'imgs').textContent = d.total;
+      document.getElementById(sumPrefix+'files').textContent = d.totalFiles;
+      document.getElementById(sumPrefix+'size').textContent = d.sizeKB >= 1024 ? (d.sizeKB/1024).toFixed(1)+' MB' : d.sizeKB+' KB';
+      document.getElementById(sumPrefix+'fmt').textContent = `${d.format} @ ${d.quality}%`;
+      const sumEl = document.getElementById(sumPrefix === 's-' ? 'auto-sum' : 'tmpl-sum');
+      if (sumEl) sumEl.classList.add('vis');
+      btn.disabled = false; btn.innerHTML = btn.dataset.orig;
+      saveJobHistory(d);
+      es.close(); onDone && onDone();
+    } else {
+      const pct = d.percent || Math.round((d.current/d.total)*100);
+      document.getElementById(barId).style.width = pct+'%';
+      document.getElementById(textId).textContent = `Processing ${d.current} / ${d.total} — ${d.filename}`;
+    }
+  };
+  es.onerror = () => es.close();
+}
+
+// ── Auto pipeline ──
+document.getElementById('btn-auto').addEventListener('click', async () => {
+  const active = selectedFiles.filter((_, i) => !deselected.has(i));
+  if (!active.length) return showErr('auto-err', 'Please select images first.');
+
+  const btn = document.getElementById('btn-auto');
+  btn.dataset.orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<svg viewBox="0 0 16 16" style="width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;animation:spin 1s linear infinite"><circle cx="8" cy="8" r="6" stroke-dasharray="20 18"/></svg> Processing...';
+
+  document.getElementById('auto-sum').classList.remove('vis');
+  document.getElementById('auto-prog').classList.add('vis');
+  document.getElementById('auto-bar').style.width = '0';
+  document.getElementById('auto-err').classList.remove('vis');
+
+  const jobId = 'auto-' + Date.now();
+  listenSSE(jobId, 'auto-bar', 'auto-prog-text', 's-', btn);
+
+  const fd = new FormData();
+  fd.append('jobId', jobId);
+  fd.append('width', document.getElementById('auto-w').value);
+  fd.append('height', document.getElementById('auto-h').value);
+  fd.append('alignment', document.getElementById('auto-gravity').value);
+  fd.append('fitMode', document.getElementById('auto-fit').value);
+  fd.append('flip', document.getElementById('auto-flip').checked);
+  buildFormData(fd);
+
+  active.forEach(f => {
+    fd.append('images', f);
+    fd.append('paths', f.webkitRelativePath || f.name);
+  });
+
+  try {
+    const res = await fetch('/process-auto', { method:'POST', body:fd });
+    if (res.ok) {
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='processed_images.zip'; a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      showErr('auto-err', err.error || 'Pipeline error');
+      btn.disabled = false; btn.innerHTML = btn.dataset.orig;
+    }
+  } catch(e) {
+    showErr('auto-err', 'Connection error: ' + e.message);
+    btn.disabled = false; btn.innerHTML = btn.dataset.orig;
+  }
+});
+
+// ── Canvas Studio ──
+const stCanvas = document.getElementById('studioCanvas');
+const stCtx = stCanvas.getContext('2d');
+const stImg = new Image();
+let stState = { scale:1, ox:0, oy:0, drag:false, sx:0, sy:0 };
+
+function resizeCanvas() {
+  const wrap = document.getElementById('canvas-wrap');
+  const sz = wrap.clientWidth;
+  stCanvas.width = sz; stCanvas.height = sz;
+  draw();
+}
+window.addEventListener('resize', resizeCanvas);
+setTimeout(resizeCanvas, 100);
+
+function draw() {
+  stCtx.clearRect(0, 0, stCanvas.width, stCanvas.height);
+  if (!stImg.src) return;
+  const dw = stImg.width * stState.scale, dh = stImg.height * stState.scale;
+  const x = (stCanvas.width - dw)/2 + stState.ox;
+  const y = (stCanvas.height - dh)/2 + stState.oy;
+  stCtx.save();
+  if (document.getElementById('tmpl-flip').checked) {
+    stCtx.translate(stCanvas.width, 0); stCtx.scale(-1, 1);
+    stCtx.drawImage(stImg, stCanvas.width-(x+dw), y, dw, dh);
+  } else {
+    stCtx.drawImage(stImg, x, y, dw, dh);
+  }
+  stCtx.restore();
+}
+
+function loadReference(inp) {
+  if (!inp.files.length) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    stImg.src = e.target.result;
+    stImg.onload = () => {
+      stState.scale = Math.min(stCanvas.width / stImg.width, stCanvas.height / stImg.height) * 0.85;
+      document.getElementById('st-scale').value = stState.scale;
+      document.getElementById('scale-val').textContent = stState.scale.toFixed(2);
+      stState.ox = 0; stState.oy = 0;
+      draw();
+      document.getElementById('ref-label').textContent = inp.files[0].name;
+      document.getElementById('ref-label').style.color = 'var(--success)';
+    };
+  };
+  reader.readAsDataURL(inp.files[0]);
+}
+
+stCanvas.addEventListener('mousedown', e => { stState.drag=true; stState.sx=e.clientX-stState.ox; stState.sy=e.clientY-stState.oy; });
+window.addEventListener('mouseup', () => stState.drag=false);
+window.addEventListener('mousemove', e => { if(!stState.drag) return; stState.ox=e.clientX-stState.sx; stState.oy=e.clientY-stState.sy; draw(); });
+stCanvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  stState.scale = Math.max(0.05, Math.min(4, stState.scale - e.deltaY * 0.001));
+  document.getElementById('st-scale').value = stState.scale;
+  document.getElementById('scale-val').textContent = stState.scale.toFixed(2);
+  draw();
+}, { passive:false });
+
+function updateTmplLabel(inp) {
+  const el = document.getElementById('tmpl-label');
+  el.style.color = inp.files.length ? 'var(--success)' : 'var(--muted)';
+  el.textContent = inp.files.length > 1 ? `${inp.files.length} images selected` : inp.files[0].name;
+}
+
+document.getElementById('btn-tmpl').addEventListener('click', async () => {
+  const files = document.getElementById('tmpl-files').files;
+  if (!stImg.src || !files.length) return showErr('tmpl-err', 'Load a reference image and select a folder.');
+
+  const btn = document.getElementById('btn-tmpl');
+  btn.dataset.orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = 'Rendering...';
+
+  document.getElementById('tmpl-sum').classList.remove('vis');
+  document.getElementById('tmpl-prog').classList.add('vis');
+  document.getElementById('tmpl-bar').style.width = '0';
+  document.getElementById('tmpl-err').classList.remove('vis');
+
+  const jobId = 'tmpl-' + Date.now();
+  listenSSE(jobId, 'tmpl-bar', 'tmpl-prog-text', 'ts-', btn);
+
+  const fd = new FormData();
+  fd.append('jobId', jobId);
+  fd.append('scale', stState.scale);
+  fd.append('flip', document.getElementById('tmpl-flip').checked);
+  fd.append('targetWidth', document.getElementById('tmpl-w').value);
+  fd.append('targetHeight', document.getElementById('tmpl-h').value);
+  fd.append('offsetX', (stCanvas.width - stImg.width * stState.scale)/2 + stState.ox);
+  fd.append('offsetY', (stCanvas.height - stImg.height * stState.scale)/2 + stState.oy);
+  buildFormData(fd);
+
+  Array.from(files).filter(f => validExts.some(e => f.name.toLowerCase().endsWith(e))).forEach(f => {
+    fd.append('images', f);
+    fd.append('paths', f.webkitRelativePath || f.name);
+  });
+
+  try {
+    const res = await fetch('/process-template', { method:'POST', body:fd });
+    if (res.ok) {
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='processed_images.zip'; a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      showErr('tmpl-err', err.error || 'Pipeline error');
+      btn.disabled = false; btn.innerHTML = btn.dataset.orig;
+    }
+  } catch(e) {
+    showErr('tmpl-err', 'Connection error: ' + e.message);
+    btn.disabled = false; btn.innerHTML = btn.dataset.orig;
+  }
+});
+
+// ── Error helper ──
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('vis');
+}
+
+// ── Job History ──
+function saveJobHistory(d) {
+  const history = JSON.parse(localStorage.getItem('pip_history') || '[]');
+  const settings = captureSettings();
+  history.unshift({
+    time: new Date().toLocaleString(),
+    images: d.total, files: d.totalFiles,
+    size: d.sizeKB >= 1024 ? (d.sizeKB/1024).toFixed(1)+' MB' : d.sizeKB+' KB',
+    format: d.format, quality: d.quality,
+    settings
+  });
+  localStorage.setItem('pip_history', JSON.stringify(history.slice(0, 5)));
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  const history = JSON.parse(localStorage.getItem('pip_history') || '[]');
+  if (!history.length) {
+    list.innerHTML = '<p class="hist-empty">No jobs yet. Process a batch to see history here.</p>';
+    return;
+  }
+  list.innerHTML = history.map((h, i) => `
+    <div class="hist-item">
+      <div class="hist-top">
+        <span class="hist-name">${h.images} images → ${h.files} files (${h.size})</span>
+        <span class="hist-time">${h.time}</span>
+      </div>
+      <div class="hist-top">
+        <span class="hist-meta">${h.format} @ ${h.quality}% quality</span>
+        <button class="hist-load" onclick="restoreSettings(${i})">Restore settings ↗</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function captureSettings() {
+  return {
+    format: document.getElementById('g-format').value,
+    quality: document.getElementById('g-quality').value,
+    bgColor: document.getElementById('g-bgcolor').value,
+    multires: document.getElementById('g-multires').checked,
+    sharpen: document.getElementById('g-sharpen').checked,
+    csv: document.getElementById('g-csv').checked,
+    brightness: document.getElementById('g-brightness').value,
+    saturation: document.getElementById('g-saturation').value,
+    hue: document.getElementById('g-hue').value,
+    overlayText: document.getElementById('g-overlay-text').value,
+    overlaySize: document.getElementById('g-overlay-size').value,
+    overlayColor: document.getElementById('g-overlay-color').value,
+    overlayPos: document.getElementById('g-overlay-pos').value,
+    autoW: document.getElementById('auto-w').value,
+    autoH: document.getElementById('auto-h').value,
+    fitMode: document.getElementById('auto-fit').value,
+    gravity: document.getElementById('auto-gravity').value,
+  };
+}
+
+function applySettings(s) {
+  if (!s) return;
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+  const chk = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
+  set('g-format', s.format); set('g-quality', s.quality);
+  set('g-bgcolor', s.bgColor); syncHex(s.bgColor);
+  chk('g-multires', s.multires); chk('g-sharpen', s.sharpen); chk('g-csv', s.csv);
+  set('g-brightness', s.brightness); set('g-saturation', s.saturation); set('g-hue', s.hue);
+  set('g-overlay-text', s.overlayText); set('g-overlay-size', s.overlaySize);
+  set('g-overlay-color', s.overlayColor); set('g-overlay-pos', s.overlayPos);
+  set('auto-w', s.autoW); set('auto-h', s.autoH);
+  set('auto-fit', s.fitMode); set('auto-gravity', s.gravity);
+  document.getElementById('g-quality-val').textContent = s.quality;
+  document.getElementById('br-val').textContent = parseFloat(s.brightness).toFixed(2);
+  document.getElementById('sat-val').textContent = parseFloat(s.saturation).toFixed(2);
+  document.getElementById('hue-val').textContent = s.hue;
+}
+
+function restoreSettings(i) {
+  const history = JSON.parse(localStorage.getItem('pip_history') || '[]');
+  if (history[i]) applySettings(history[i].settings);
+  document.querySelector('.htab').click();
+}
+
+// ── Settings Profiles ──
+function getProfiles() { return JSON.parse(localStorage.getItem('pip_profiles') || '{}'); }
+
+function saveProfile() {
+  const name = prompt('Profile name:');
+  if (!name) return;
+  const profiles = getProfiles();
+  profiles[name] = captureSettings();
+  localStorage.setItem('pip_profiles', JSON.stringify(profiles));
+  refreshProfileSelect();
+  alert(`Profile "${name}" saved.`);
+}
+
+function loadProfile() {
+  const name = document.getElementById('profile-select').value;
+  if (!name) return;
+  const profiles = getProfiles();
+  if (profiles[name]) applySettings(profiles[name]);
+}
+
+function deleteProfile() {
+  const name = document.getElementById('profile-select').value;
+  if (!name || !confirm(`Delete "${name}"?`)) return;
+  const profiles = getProfiles();
+  delete profiles[name];
+  localStorage.setItem('pip_profiles', JSON.stringify(profiles));
+  refreshProfileSelect();
+}
+
+function refreshProfileSelect() {
+  const sel = document.getElementById('profile-select');
+  const profiles = getProfiles();
+  sel.innerHTML = '<option value="">— Load a profile —</option>' +
+    Object.keys(profiles).map(n => `<option value="${n}">${n}</option>`).join('');
+}
+
+// ── Init ──
+renderHistory();
+refreshProfileSelect();
+
+// Spin animation for loader
+const style = document.createElement('style');
+style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(style);
+</script>
+</body>
+</html>

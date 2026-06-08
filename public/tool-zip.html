@@ -1,0 +1,38 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZIP Image Processor — Resize Images inside ZIP File Free</title><meta name="description" content="Upload a ZIP of images, resize all images inside it, download a new ZIP. Free online tool."><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="shared.css"></head>
+<body>
+<header class="header"><a href="/" class="logo"><div class="logo-icon">⚡</div>ImagePipeline Pro</a><nav class="nav"><a href="/">Home</a><a href="tool-resizer.html">Resizer</a><a href="tool-exif.html">EXIF</a><a href="tool-zip.html" class="active">ZIP</a></nav></header>
+<div class="main">
+<div class="page-head"><div class="page-title">📦 ZIP Image Processor</div><div class="page-sub">Upload a ZIP file containing images — resize all of them and download a new processed ZIP.</div></div>
+<div class="layout2">
+<div>
+<div class="card"><div class="card-title">Upload ZIP File</div>
+<div class="dropzone" id="dz" onclick="document.getElementById('zip-file').click()"><input type="file" id="zip-file" accept=".zip" onchange="onZip(this)"><span class="dz-icon">📦</span><p class="dz-text" id="dz-label">Drop .zip file here or click to browse</p><span class="dz-sub">ZIP containing JPG, PNG or WebP images</span></div></div>
+<div class="card"><div class="card-title">Output Settings</div>
+<div class="row2"><div class="field"><span class="label">Width (px)</span><input type="number" id="w" value="1080"></div><div class="field"><span class="label">Height (px)</span><input type="number" id="h" value="1080"></div></div>
+<div class="field" style="margin-top:10px"><span class="label">Fit Mode</span><select id="fit"><option value="contain">Contain — letterbox with bg</option><option value="cover">Cover — crop to fill</option><option value="fill">Fill — stretch</option></select></div>
+<div class="field"><span class="label">Background Color</span><div style="display:flex;gap:8px;align-items:center"><input type="color" id="bg" value="#ffffff"><input type="text" id="bg-hex" value="#ffffff" style="flex:1;font-family:monospace;font-size:12px" oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value))document.getElementById('bg').value=this.value"></div></div>
+<div class="field"><span class="label">Output Format</span><select id="fmt"><option value="webp">WebP</option><option value="jpeg">JPEG</option><option value="png">PNG</option></select></div>
+<div class="field"><span class="label">Quality — <span id="q-val">90</span>%</span><input type="range" id="quality" min="50" max="100" value="90" oninput="document.getElementById('q-val').textContent=this.value"></div>
+</div></div>
+<div><div class="card">
+<button class="btn" id="btn" onclick="process()"><svg viewBox="0 0 16 16"><path d="M3 8h10M9 5l3 3-3 3"/></svg>Process ZIP</button>
+<div class="err" id="err" style="margin-top:10px"></div>
+</div>
+<div class="card" style="margin-top:16px"><div class="card-title">When to use this</div>
+<p style="font-size:12px;color:var(--muted);line-height:1.8">• Suppliers send product images as a ZIP<br>• Received a batch of images via email as ZIP<br>• Want to process images without extracting first<br>• Images are already organised in a ZIP folder structure</p>
+</div></div></div></div>
+<footer class="footer">ImagePipeline Pro — <a href="/">All Tools</a></footer>
+<script src="shared.js"></script>
+<script>
+let zipFile=null;
+function onZip(inp){if(!inp.files[0])return;zipFile=inp.files[0];document.getElementById('dz').classList.add('has');document.getElementById('dz-label').textContent=inp.files[0].name;}
+document.getElementById('bg').addEventListener('input',function(){document.getElementById('bg-hex').value=this.value;});
+['dragenter','dragover'].forEach(e=>document.getElementById('dz').addEventListener(e,ev=>{ev.preventDefault();document.getElementById('dz').classList.add('drag');}));
+['dragleave','drop'].forEach(e=>document.getElementById('dz').addEventListener(e,ev=>{ev.preventDefault();document.getElementById('dz').classList.remove('drag');if(e==='drop'&&ev.dataTransfer.files[0]&&ev.dataTransfer.files[0].name.endsWith('.zip')){zipFile=ev.dataTransfer.files[0];document.getElementById('dz').classList.add('has');document.getElementById('dz-label').textContent=zipFile.name;}}));
+async function process(){
+  if(!zipFile) return showErr('err','Please select a ZIP file.');
+  hideErr('err');setBtn('btn',true);
+  const fd=new FormData();fd.append('zipfile',zipFile);fd.append('width',document.getElementById('w').value);fd.append('height',document.getElementById('h').value);fd.append('fitMode',document.getElementById('fit').value);fd.append('bgColor',document.getElementById('bg').value);fd.append('format',document.getElementById('fmt').value);fd.append('quality',document.getElementById('quality').value);
+  try{const res=await fetch('/zip-process',{method:'POST',body:fd});if(res.ok){triggerDownload(await res.blob(),'processed_from_zip.zip');}else{const e=await res.json().catch(()=>({}));showErr('err',e.error||'Error');}setBtn('btn',false);}catch(e){showErr('err','Connection error');setBtn('btn',false);}
+}
+</script></body></html>

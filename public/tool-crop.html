@@ -1,0 +1,37 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Batch Image Cropper — Crop Images to Same Size Free</title><meta name="description" content="Crop hundreds of images to the same dimensions in one batch. Free online tool."><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="shared.css"></head>
+<body>
+<header class="header"><a href="/" class="logo"><div class="logo-icon">⚡</div>ImagePipeline Pro</a><nav class="nav"><a href="/">Home</a><a href="tool-resizer.html">Resizer</a><a href="tool-crop.html" class="active">Crop</a><a href="tool-watermark.html">Watermark</a></nav></header>
+<div class="main">
+<div class="page-head"><div class="page-title">✂️ Batch Cropper</div><div class="page-sub">Crop all images to the same size. Smart cropping keeps the main subject in frame.</div></div>
+<div class="layout2">
+<div>
+<div class="card"><div class="card-title">Upload Images</div>
+<div class="dropzone" id="dz" onclick="document.getElementById('files').click()"><input class="dz-input" type="file" id="files" multiple accept="image/*" onchange="onFiles(this)"><span class="dz-icon">✂️</span><p class="dz-text" id="dz-label">Drop images here or click</p><span class="dz-sub">JPG, PNG, WebP</span></div></div>
+<div class="card"><div class="card-title">Crop Settings</div>
+<div class="row2"><div class="field"><span class="label">Width (px)</span><input type="number" id="cw" value="1080"></div><div class="field"><span class="label">Height (px)</span><input type="number" id="ch" value="1080"></div></div>
+<div class="field" style="margin-top:10px"><span class="label">Crop Focus</span><select id="gravity"><option value="center">Center</option><option value="attention">Smart — detect subject</option><option value="entropy">Smart — max detail</option><option value="north">Top</option><option value="south">Bottom</option></select></div>
+<div class="field"><span class="label">Format</span><select id="fmt"><option value="webp">WebP</option><option value="jpeg">JPEG</option><option value="png">PNG</option></select></div>
+<div class="field"><span class="label">Quality — <span id="q-val">90</span>%</span><input type="range" id="quality" min="50" max="100" value="90" oninput="document.getElementById('q-val').textContent=this.value"></div>
+</div></div>
+<div><div class="card">
+<button class="btn" id="btn" onclick="process()"><svg viewBox="0 0 16 16"><path d="M3 8h10M9 5l3 3-3 3"/></svg>Crop Batch</button>
+<div class="prog-wrap" id="prog"><div class="prog-bg"><div class="prog-bar" id="bar"></div></div><div class="prog-text" id="prog-text">Preparing...</div></div>
+<div class="summary" id="sum"><div class="sum-item"><span class="sum-val" id="s-imgs">—</span><span class="sum-key">Images cropped</span></div></div>
+<div class="err" id="err"></div>
+</div></div></div></div>
+<footer class="footer">ImagePipeline Pro — <a href="/">All Tools</a></footer>
+<script src="shared.js"></script>
+<script>
+let files=[];
+function onFiles(inp){files=[...inp.files].filter(f=>/\.(jpe?g|png|webp)$/i.test(f.name));document.getElementById('dz').classList.add('has');document.getElementById('dz-label').textContent=`${files.length} images ready`;}
+['dragenter','dragover'].forEach(e=>document.getElementById('dz').addEventListener(e,ev=>{ev.preventDefault();document.getElementById('dz').classList.add('drag');}));
+['dragleave','drop'].forEach(e=>document.getElementById('dz').addEventListener(e,ev=>{ev.preventDefault();document.getElementById('dz').classList.remove('drag');if(e==='drop'){files=[...ev.dataTransfer.files].filter(f=>/\.(jpe?g|png|webp)$/i.test(f.name));if(files.length){document.getElementById('dz').classList.add('has');document.getElementById('dz-label').textContent=`${files.length} images ready`;}}}));
+async function process(){
+  if(!files.length) return showErr('err','Please select images.');
+  hideErr('err');setBtn('btn',true);document.getElementById('sum').classList.remove('vis');document.getElementById('prog').classList.add('vis');document.getElementById('bar').style.width='0';
+  const jobId='cr-'+Date.now();
+  listenSSE(jobId,'bar','prog-text',d=>{document.getElementById('s-imgs').textContent=d.total;document.getElementById('sum').classList.add('vis');setBtn('btn',false);});
+  const fd=new FormData();fd.append('jobId',jobId);fd.append('cropW',document.getElementById('cw').value);fd.append('cropH',document.getElementById('ch').value);fd.append('gravity',document.getElementById('gravity').value);fd.append('format',document.getElementById('fmt').value);fd.append('quality',document.getElementById('quality').value);files.forEach(f=>fd.append('images',f));
+  try{const res=await fetch('/crop',{method:'POST',body:fd});if(res.ok){triggerDownload(await res.blob(),'cropped_images.zip');}else{const e=await res.json().catch(()=>({}));showErr('err',e.error||'Error');setBtn('btn',false);}}catch(e){showErr('err','Connection error');setBtn('btn',false);}
+}
+</script></body></html>

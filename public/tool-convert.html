@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bulk Image Format Converter — JPG to WebP PNG free</title><meta name="description" content="Convert JPG to WebP, PNG to JPG, bulk format conversion online free."><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="shared.css"></head>
+<body>
+<header class="header"><a href="/" class="logo"><div class="logo-icon">⚡</div>ImagePipeline Pro</a><nav class="nav"><a href="/">Home</a><a href="tool-compress.html">Compress</a><a href="tool-convert.html" class="active">Convert</a><a href="tool-crop.html">Crop</a></nav></header>
+<div class="main">
+<div class="page-head"><div class="page-title">🔄 Format Converter</div><div class="page-sub">Convert JPG to WebP, PNG to JPG and more — bulk batch, free.</div></div>
+<div class="layout2">
+<div>
+<div class="card"><div class="card-title">Upload Images</div>
+<div class="dropzone" id="dz" onclick="document.getElementById('files').click()"><input class="dz-input" type="file" id="files" multiple accept="image/*" onchange="onFiles(this)"><span class="dz-icon">🔄</span><p class="dz-text" id="dz-label">Drop images here or click to browse</p><span class="dz-sub">JPG, PNG, WebP supported</span></div></div>
+<div class="card"><div class="card-title">Settings</div>
+<div class="field"><span class="label">Convert To</span><select id="toFormat"><option value="webp">WebP — smallest file size</option><option value="jpeg">JPEG — universal</option><option value="png">PNG — lossless</option></select></div>
+<div class="field"><span class="label">Quality — <span id="q-val">90</span>%</span><input type="range" id="quality" min="50" max="100" value="90" oninput="document.getElementById('q-val').textContent=this.value"></div>
+</div></div>
+<div><div class="card">
+<button class="btn" id="btn" onclick="process()"><svg viewBox="0 0 16 16"><path d="M3 8h10M9 5l3 3-3 3"/></svg>Convert Images</button>
+<div class="prog-wrap" id="prog"><div class="prog-bg"><div class="prog-bar" id="bar"></div></div><div class="prog-text" id="prog-text">Preparing...</div></div>
+<div class="summary" id="sum"><div class="sum-item"><span class="sum-val" id="s-imgs">—</span><span class="sum-key">Images converted</span></div><div class="sum-item"><span class="sum-val" id="s-fmt">—</span><span class="sum-key">Output format</span></div></div>
+<div class="err" id="err"></div>
+</div></div></div></div>
+<footer class="footer">ImagePipeline Pro — <a href="/">All Tools</a></footer>
+<script src="shared.js"></script>
+<script>
+let files=[];
+function onFiles(inp){files=[...inp.files].filter(f=>/\.(jpe?g|png|webp)$/i.test(f.name));const dz=document.getElementById('dz');dz.classList.add('has');document.getElementById('dz-label').textContent=`${files.length} images ready`;}
+['dragenter','dragover'].forEach(e=>document.getElementById('dz').addEventListener(e,ev=>{ev.preventDefault();document.getElementById('dz').classList.add('drag');}));
+['dragleave','drop'].forEach(e=>document.getElementById('dz').addEventListener(e,ev=>{ev.preventDefault();document.getElementById('dz').classList.remove('drag');if(e==='drop'){files=[...ev.dataTransfer.files].filter(f=>/\.(jpe?g|png|webp)$/i.test(f.name));if(files.length){document.getElementById('dz').classList.add('has');document.getElementById('dz-label').textContent=`${files.length} images ready`;}}}));
+async function process(){
+  if(!files.length) return showErr('err','Please select images first.');
+  hideErr('err');setBtn('btn',true);document.getElementById('sum').classList.remove('vis');document.getElementById('prog').classList.add('vis');document.getElementById('bar').style.width='0';
+  const jobId='cv-'+Date.now();
+  listenSSE(jobId,'bar','prog-text',d=>{document.getElementById('s-imgs').textContent=d.total;document.getElementById('s-fmt').textContent=d.format;document.getElementById('sum').classList.add('vis');setBtn('btn',false);});
+  const fd=new FormData();fd.append('jobId',jobId);fd.append('toFormat',document.getElementById('toFormat').value);fd.append('quality',document.getElementById('quality').value);files.forEach(f=>fd.append('images',f));
+  try{const res=await fetch('/convert',{method:'POST',body:fd});if(res.ok){triggerDownload(await res.blob(),'converted_images.zip');}else{const e=await res.json().catch(()=>({}));showErr('err',e.error||'Error');setBtn('btn',false);}}catch(e){showErr('err','Connection error');setBtn('btn',false);}
+}
+</script></body></html>

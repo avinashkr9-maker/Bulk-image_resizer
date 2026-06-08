@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ImagePipeline Pro — Free Online Image Tools</title>
+<meta name="description" content="Free online bulk image tools — resize, compress, convert, crop, watermark, remove background and more. No signup required.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.hero{text-align:center;padding:60px 20px 40px;max-width:640px;margin:0 auto}
+.hero-title{font-size:36px;font-weight:600;line-height:1.2;margin-bottom:14px}
+.hero-title span{color:var(--accent)}
+.hero-sub{font-size:15px;color:var(--muted);line-height:1.7}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:40px}
+.tool-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r12);padding:20px;cursor:pointer;transition:.2s;text-decoration:none;display:block}
+.tool-card:hover{border-color:var(--accent);background:var(--surface2);transform:translateY(-2px)}
+.tool-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:22px}
+.tool-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px}
+.tool-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.tool-badge{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:600;display:inline-block;margin-top:8px}
+.b-hot{background:rgba(248,81,73,0.12);color:#F85149}
+.b-new{background:var(--accent-dim);color:var(--accent)}
+.section-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--hint);margin:36px 0 14px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.stats-row{display:flex;gap:32px;justify-content:center;padding:24px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:32px 0}
+.stat{text-align:center}
+.stat-val{font-size:24px;font-weight:600;color:var(--text)}
+.stat-key{font-size:11px;color:var(--muted);margin-top:2px}
+</style>
+</head>
+<body>
+<header class="header">
+  <a href="/" class="logo"><div class="logo-icon">⚡</div>ImagePipeline Pro</a>
+  <nav class="nav">
+    <a href="/" class="active">Home</a>
+    <a href="tool-resizer.html">Resizer</a>
+    <a href="tool-compress.html">Compress</a>
+    <a href="tool-convert.html">Convert</a>
+    <a href="tool-crop.html">Crop</a>
+  </nav>
+</header>
+
+<div class="main">
+  <div class="hero">
+    <div class="hero-title">Free Image Tools<br>for <span>Ecommerce & Creators</span></div>
+    <p class="hero-sub">Bulk resize, compress, convert, crop and watermark hundreds of images at once. No signup. No software. Completely free.</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val">500+</div><div class="stat-key">Images per batch</div></div>
+    <div class="stat"><div class="stat-val">8</div><div class="stat-key">Free tools</div></div>
+    <div class="stat"><div class="stat-val">0</div><div class="stat-key">Signup required</div></div>
+    <div class="stat"><div class="stat-val">WebP/JPG/PNG</div><div class="stat-key">Formats supported</div></div>
+  </div>
+
+  <p class="section-label">All Tools</p>
+
+  <div class="tools-grid">
+    <a href="tool-resizer.html" class="tool-card">
+      <div class="tool-icon" style="background:rgba(124,111,247,0.12)">📐</div>
+      <div class="tool-name">Bulk Image Resizer</div>
+      <div class="tool-desc">Resize hundreds of images to any size. Amazon, Shopify, Instagram presets built in.</div>
+      <span class="tool-badge b-hot">Most Popular</span>
+    </a>
+    <a href="tool-compress.html" class="tool-card">
+      <div class="tool-icon" style="background:rgba(63,185,80,0.1)">🗜️</div>
+      <div class="tool-name">Image Compressor</div>
+      <div class="tool-desc">Compress JPG, PNG and WebP images without visible quality loss. Save up to 80%.</div>
+      <span class="tool-badge b-hot">High Traffic</span>
+    </a>
+    <a href="tool-convert.html" class="tool-card">
+      <div class="tool-icon" style="background:rgba(59,130,246,0.1)">🔄</div>
+      <div class="tool-name">Format Converter</div>
+      <div class="tool-desc">Convert JPG to WebP, PNG to JPG, HEIC to JPG and more. Bulk batch supported.</div>
+      <span class="tool-badge b-new">New</span>
+    </a>
+    <a href="tool-crop.html" class="tool-card">
+      <div class="tool-icon" style="background:rgba(227,179,65,0.1)">✂️</div>
+      <div class="tool-name">Batch Cropper</div>
+      <div class="tool-desc">Crop all your images to the same size and ratio in one click.</div>
+      <span class="tool-badge b-new">New</span>
+    </a>
+    <a href="tool-watermark.html" class="tool-card">
+      <div class="tool-icon" style="background:rgba(124,111,247,0.1)">🔏</div>
+      <div class="tool-name">Image Watermarker</div>
+      <div class="tool-desc">Add your logo or text watermark to hundreds of images automatically.</div>
+      <span class="tool-badge b-new">New</span>
+    </a>
+    <a href="tool-palette.html" class="tool-card">
+      <div class="tool-icon" style="background:rgba(248,81,73,0.08)">🎨</div>
+      <div class="tool-name">Colour Palette Extractor</div>
+      <div class="tool-desc">Extract the exact hex colour palette from any image. Perfect for designers.</div>
+      <span class="tool-badge b-new">New</span>
+    </a>
+    <a href="tool-exif.html" class="tool-card">
+      <div class="tool-icon" style="background:rgba(63,185,80,0.08)">🔒</div>
+      <div class="tool-name">EXIF Data Remover</div>
+      <div class="tool-desc">Strip GPS location, camera info and all metadata from images before sharing.</div>
+      <span class="tool-badge b-new">New</span>
+    </a>
+    <a href="tool-zip.html" class="tool-card">
+      <div class="tool-icon" style="background:rgba(227,179,65,0.08)">📦</div>
+      <div class="tool-name">ZIP Image Processor</div>
+      <div class="tool-desc">Upload a ZIP of images, resize all inside it, download a new ZIP. Zero hassle.</div>
+      <span class="tool-badge b-new">New</span>
+    </a>
+  </div>
+</div>
+
+<footer class="footer">
+  ImagePipeline Pro &nbsp;·&nbsp; Free online image tools &nbsp;·&nbsp;
+  <a href="tool-resizer.html">Resizer</a> &nbsp;·&nbsp;
+  <a href="tool-compress.html">Compressor</a> &nbsp;·&nbsp;
+  <a href="tool-convert.html">Converter</a>
+</footer>
+</body>
+</html>

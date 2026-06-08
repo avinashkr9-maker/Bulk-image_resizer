@@ -1,0 +1,17 @@
+{
+  "name": "imagepipeline-hub",
+  "version": "1.0.0",
+  "description": "ImagePipeline Pro — Multi-tool image processing hub",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "dev": "node server.js" },
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "adm-zip": "^0.5.10",
+    "archiver": "^7.0.1",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "multer": "^2.1.1",
+    "sharp": "^0.34.5"
+  }
+}
