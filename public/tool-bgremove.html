@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Background Remover — Remove Image Background Free Online</title>
+<meta name="description" content="Remove image background for free online. No signup, no API key, AI runs in your browser. Upload photo, background removed instantly.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+.hero-banner{background:linear-gradient(135deg,rgba(124,111,247,0.12) 0%,rgba(63,185,80,0.06) 100%);border:1px solid rgba(124,111,247,0.2);border-radius:var(--r12);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.hero-banner svg{width:28px;height:28px;flex-shrink:0;stroke:var(--accent);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.hero-banner p{font-size:12px;color:var(--muted);line-height:1.6;margin:0}
+.hero-banner strong{color:var(--text);font-weight:500}
+
+.model-status{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r8);margin-bottom:16px;font-size:12px}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--hint);transition:.3s}
+.status-dot.loading{background:var(--warn);animation:pulse 1s ease-in-out infinite}
+.status-dot.ready{background:var(--success)}
+.status-dot.error{background:var(--danger)}
+.status-text{color:var(--muted)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.upload-area{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.result-box{border:1px solid var(--border);border-radius:var(--r12);overflow:hidden;background:var(--surface2);position:relative;min-height:280px;display:flex;align-items:center;justify-content:center}
+.result-box.checkerboard{background-image:linear-gradient(45deg,#2a2a2a 25%,transparent 25%),linear-gradient(-45deg,#2a2a2a 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#2a2a2a 75%),linear-gradient(-45deg,transparent 75%,#2a2a2a 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0}
+.result-box img{max-width:100%;max-height:360px;object-fit:contain;display:block}
+.result-box canvas{max-width:100%;max-height:360px;object-fit:contain;display:block}
+.result-label{position:absolute;top:8px;left:8px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.5);color:#fff;padding:3px 8px;border-radius:20px}
+.result-placeholder{text-align:center;color:var(--hint);padding:20px}
+.result-placeholder svg{width:40px;height:40px;stroke:var(--hint);fill:none;stroke-width:1;margin-bottom:10px}
+.result-placeholder p{font-size:12px}
+
+.processing-overlay{position:absolute;inset:0;background:rgba(13,17,23,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:var(--r12)}
+.spinner{width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-text{font-size:12px;color:var(--muted);text-align:center}
+
+.batch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:12px;max-height:400px;overflow-y:auto;padding-right:4px}
+.batch-grid::-webkit-scrollbar{width:4px}
+.batch-grid::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.thumb-card{position:relative;border-radius:var(--r8);overflow:hidden;background:var(--surface2);border:1px solid var(--border);aspect-ratio:1}
+.thumb-card img,.thumb-card canvas{width:100%;height:100%;object-fit:contain;display:block}
+.thumb-card .tc-status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(13,17,23,.7);font-size:11px;color:#fff;transition:.2s}
+.thumb-card.done .tc-status{background:rgba(63,185,80,.15)}
+.thumb-card.done .tc-status svg{width:18px;height:18px;stroke:var(--success);fill:none;stroke-width:2.5}
+.thumb-card.error .tc-status{background:rgba(248,81,73,.15);color:var(--danger)}
+
+.dl-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 16px;background:var(--success);border:none;border-radius:var(--r8);color:#fff;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:.15s;text-decoration:none;width:100%}
+.dl-btn:hover{opacity:.9}
+.dl-btn svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.mode-tabs{display:flex;gap:4px;background:var(--surface2);padding:3px;border-radius:var(--r8);border:1px solid var(--border);margin-bottom:16px}
+.mode-tab{flex:1;padding:7px;border:none;background:transparent;color:var(--muted);font-size:12px;font-weight:500;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;transition:.15s}
+.mode-tab.active{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+
+.bg-options{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px}
+.bg-swatch{width:100%;aspect-ratio:1;border-radius:var(--r4);border:2px solid transparent;cursor:pointer;transition:.15s}
+.bg-swatch.active{border-color:var(--accent)}
+.bg-swatch.transparent-swatch{background-image:linear-gradient(45deg,#888 25%,transparent 25%),linear-gradient(-45deg,#888 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#888 75%),linear-gradient(-45deg,transparent 75%,#888 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0}
+
+.tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.tip-item{display:flex;align-items:flex-start;gap:8px;padding:10px;background:var(--surface2);border-radius:var(--r8);border:1px solid var(--border)}
+.tip-item svg{width:14px;height:14px;flex-shrink:0;margin-top:1px}
+.tip-item p{font-size:11px;color:var(--muted);line-height:1.5;margin:0}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a href="/" class="logo"><div class="logo-icon">⚡</div>ImagePipeline Pro</a>
+  <nav class="nav">
+    <a href="/">Home</a>
+    <a href="tool-resizer.html">Resizer</a>
+    <a href="tool-compress.html">Compress</a>
+    <a href="tool-bgremove.html" class="active">BG Remover</a>
+    <a href="tool-palette.html">Palette</a>
+  </nav>
+</header>
+
+<div class="main">
+  <div class="page-head">
+    <div class="page-title">✂️ Background Remover</div>
+    <div class="page-sub">AI removes background instantly — runs in your browser, 100% free, no signup, no server.</div>
+  </div>
+
+  <!-- How it works banner -->
+  <div class="hero-banner">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    <p><strong>How it works:</strong> First use mein AI model (~40MB) tumhare browser mein download hoga — ek baar ke baad instantly kaam karta hai. Koi image hamare server pe nahi jaati. Sab kuch tumhare device pe hota hai.</p>
+  </div>
+
+  <!-- Mode tabs -->
+  <div class="mode-tabs">
+    <button class="mode-tab active" onclick="switchMode('single',this)">Single Image</button>
+    <button class="mode-tab" onclick="switchMode('batch',this)">Batch (Multiple)</button>
+  </div>
+
+  <!-- Model loading status -->
+  <div class="model-status">
+    <div class="status-dot loading" id="status-dot"></div>
+    <span class="status-text" id="status-text">AI model load ho raha hai... (~40MB, ek baar)</span>
+  </div>
+
+  <!-- ── SINGLE MODE ── -->
+  <div id="mode-single">
+    <div class="layout2">
+
+      <!-- Left: Upload + Settings -->
+      <div>
+        <div class="card">
+          <div class="card-title">
+            <svg viewBox="0 0 16 16"><path d="M2 10v4h12v-4"/><path d="M8 2v8M5 5l3-3 3 3"/></svg>
+            Upload Image
+          </div>
+          <div class="dropzone" id="single-dz" onclick="document.getElementById('single-file').click()">
+            <input type="file" id="single-file" accept="image/*" onchange="onSingleFile(this)">
+            <span class="dz-icon">✂️</span>
+            <p class="dz-text" id="single-dz-label">Drop image here or click to browse</p>
+            <span class="dz-sub">JPG, PNG, WebP — any photo</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Background Replacement</div>
+          <div class="field">
+            <span class="label">Replace with</span>
+            <select id="bg-type" onchange="onBgTypeChange()">
+              <option value="transparent">Transparent (PNG)</option>
+              <option value="color">Solid Color</option>
+              <option value="white">White</option>
+              <option value="black">Black</option>
+            </select>
+          </div>
+          <div id="color-picker-wrap" style="display:none" class="field">
+            <span class="label">Pick Color</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="color" id="bg-color" value="#7C6FF7" oninput="updateBgColor()">
+              <input type="text" id="bg-color-hex" value="#7C6FF7" style="flex:1;font-family:monospace;font-size:12px" oninput="syncColorPicker()">
+            </div>
+            <div class="bg-options">
+              <div class="bg-swatch" style="background:#ffffff" onclick="setBgColor('#ffffff')"></div>
+              <div class="bg-swatch" style="background:#000000" onclick="setBgColor('#000000')"></div>
+              <div class="bg-swatch" style="background:#7C6FF7" onclick="setBgColor('#7C6FF7')"></div>
+              <div class="bg-swatch" style="background:#3FB950" onclick="setBgColor('#3FB950')"></div>
+              <div class="bg-swatch" style="background:#E3B341" onclick="setBgColor('#E3B341')"></div>
+              <div class="bg-swatch" style="background:#F85149" onclick="setBgColor('#F85149')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Results -->
+      <div>
+        <div class="card">
+          <div class="card-title">Result</div>
+          <div class="upload-area">
+            <div class="result-box" id="orig-box">
+              <span class="result-label">Original</span>
+              <div class="result-placeholder">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                <p>Upload an image</p>
+              </div>
+            </div>
+            <div class="result-box checkerboard" id="result-box">
+              <span class="result-label">Output</span>
+              <div class="result-placeholder">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                <p>Background removed</p>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:10px">
+            <button class="btn" id="btn-remove" onclick="removeBg()" style="flex:2">
+              <svg viewBox="0 0 16 16"><path d="M12 4L4 12M4 4l8 8"/></svg>
+              Remove Background
+            </button>
+            <a class="dl-btn" id="dl-btn" style="flex:1;display:none" download="no-bg.png">
+              <svg viewBox="0 0 16 16"><path d="M8 2v8M5 13h6M4 10l4 4 4-4"/></svg>
+              Download
+            </a>
+          </div>
+          <div class="err" id="single-err"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BATCH MODE ── -->
+  <div id="mode-batch" style="display:none">
+    <div class="layout2">
+      <div>
+        <div class="card">
+          <div class="card-title">Upload Images</div>
+          <div class="dropzone" id="batch-dz" onclick="document.getElementById('batch-files').click()">
+            <input type="file" id="batch-files" multiple accept="image/*" onchange="onBatchFiles(this)">
+            <span class="dz-icon">✂️</span>
+            <p class="dz-text" id="batch-dz-label">Drop multiple images here</p>
+            <span class="dz-sub">All backgrounds removed one by one</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Settings</div>
+          <div class="field">
+            <span class="label">Output background</span>
+            <select id="batch-bg-type">
+              <option value="transparent">Transparent (PNG)</option>
+              <option value="white">White background</option>
+              <option value="color">Custom color</option>
+            </select>
+          </div>
+          <button class="btn" id="btn-batch" onclick="processBatch()">
+            <svg viewBox="0 0 16 16"><path d="M3 8h10M9 5l3 3-3 3"/></svg>
+            Process All Images
+          </button>
+          <div style="margin-top:10px;display:none" id="batch-dl-wrap">
+            <button class="dl-btn" onclick="downloadAllBatch()">
+              <svg viewBox="0 0 16 16"><path d="M8 2v8M5 13h6M4 10l4 4 4-4"/></svg>
+              Download All as ZIP
+            </button>
+          </div>
+          <div class="err" id="batch-err"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-title">Batch Queue</div>
+          <div class="batch-grid" id="batch-grid">
+            <p style="font-size:12px;color:var(--hint);grid-column:1/-1">Upload images to see them here</p>
+          </div>
+          <div class="summary" id="batch-sum" style="margin-top:12px">
+            <div class="sum-item"><span class="sum-val" id="b-done">0</span><span class="sum-key">Done</span></div>
+            <div class="sum-item"><span class="sum-val" id="b-total">0</span><span class="sum-key">Total</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tips -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Tips for best results</div>
+    <div class="tips-grid">
+      <div class="tip-item">
+        <svg viewBox="0 0 14 14" style="stroke:var(--success);fill:none;stroke-width:2"><path d="M2 7l3 3 7-7"/></svg>
+        <p>Plain background wali photos pe best kaam karta hai — white, grey ya solid color</p>
+      </div>
+      <div class="tip-item">
+        <svg viewBox="0 0 14 14" style="stroke:var(--success);fill:none;stroke-width:2"><path d="M2 7l3 3 7-7"/></svg>
+        <p>Product images, portraits aur logos pe excellent results milte hain</p>
+      </div>
+      <div class="tip-item">
+        <svg viewBox="0 0 14 14" style="stroke:var(--warn);fill:none;stroke-width:2"><path d="M7 2v5M7 9v1"/></svg>
+        <p>Pehli baar 20-40 seconds lagenge — model download hoga. Phir fast ho jaayega</p>
+      </div>
+      <div class="tip-item">
+        <svg viewBox="0 0 14 14" style="stroke:var(--warn);fill:none;stroke-width:2"><path d="M7 2v5M7 9v1"/></svg>
+        <p>Complex backgrounds (jungle, crowd) pe accuracy thodi kam ho sakti hai</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">ImagePipeline Pro — <a href="/">All Tools</a> &nbsp;·&nbsp; AI runs in your browser — no images uploaded to server</footer>
+
+<script type="module">
+import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0/dist/transformers.min.js';
+
+// Use CDN hosted models
+env.allowLocalModels = false;
+env.useBrowserCache = true;
+
+let segmenter = null;
+let modelReady = false;
+let currentFile = null;
+let batchFiles = [];
+let batchResults = [];
+let currentMode = 'single';
+let bgType = 'transparent';
+let bgColor = '#7C6FF7';
+
+// Status helpers
+function setStatus(state, msg) {
+    const dot = document.getElementById('status-dot');
+    const txt = document.getElementById('status-text');
+    dot.className = 'status-dot ' + state;
+    txt.textContent = msg;
+}
+
+// Load model
+async function loadModel() {
+    try {
+        setStatus('loading', 'AI model load ho raha hai... (~40MB, ek baar cache hoga)');
+        segmenter = await pipeline('image-segmentation', 'Xenova/segformer-b0-finetuned-ade-512-512', {
+            progress_callback: (p) => {
+                if (p.status === 'downloading') {
+                    const pct = p.progress ? Math.round(p.progress) : 0;
+                    setStatus('loading', `Downloading AI model... ${pct}%`);
+                }
+            }
+        });
+        modelReady = true;
+        setStatus('ready', 'AI model ready — images process karo!');
+    } catch(err) {
+        // Fallback to rembg-like model
+        try {
+            segmenter = await pipeline('image-segmentation', 'Xenova/u2net', {
+                progress_callback: (p) => {
+                    if (p.status === 'downloading') {
+                        const pct = p.progress ? Math.round(p.progress) : 0;
+                        setStatus('loading', `Downloading AI model... ${pct}%`);
+                    }
+                }
+            });
+            modelReady = true;
+            setStatus('ready', 'AI model ready — images process karo!');
+        } catch(err2) {
+            setStatus('error', 'Model load nahi hua. Internet connection check karo aur page reload karo.');
+            console.error(err2);
+        }
+    }
+}
+
+// Mode switch
+window.switchMode = function(mode, btn) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('mode-single').style.display = mode === 'single' ? 'block' : 'none';
+    document.getElementById('mode-batch').style.display = mode === 'batch' ? 'block' : 'none';
+};
+
+// BG Type change
+window.onBgTypeChange = function() {
+    bgType = document.getElementById('bg-type').value;
+    const cp = document.getElementById('color-picker-wrap');
+    cp.style.display = bgType === 'color' ? 'block' : 'none';
+    if (document.getElementById('result-canvas')) applyBackground();
+};
+
+window.updateBgColor = function() {
+    bgColor = document.getElementById('bg-color').value;
+    document.getElementById('bg-color-hex').value = bgColor;
+    if (document.getElementById('result-canvas')) applyBackground();
+};
+
+window.syncColorPicker = function() {
+    const hex = document.getElementById('bg-color-hex').value;
+    if (/^#[0-9a-fA-F]{6}$/.test(hex)) {
+        bgColor = hex;
+        document.getElementById('bg-color').value = hex;
+        if (document.getElementById('result-canvas')) applyBackground();
+    }
+};
+
+window.setBgColor = function(color) {
+    bgColor = color;
+    document.getElementById('bg-color').value = color;
+    document.getElementById('bg-color-hex').value = color;
+    if (document.getElementById('result-canvas')) applyBackground();
+};
+
+// Single file upload
+window.onSingleFile = function(input) {
+    if (!input.files[0]) return;
+    currentFile = input.files[0];
+    const dz = document.getElementById('single-dz');
+    dz.classList.add('has');
+    document.getElementById('single-dz-label').textContent = currentFile.name;
+
+    // Show original preview
+    const origBox = document.getElementById('orig-box');
+    origBox.innerHTML = '<span class="result-label">Original</span>';
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(currentFile);
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '360px';
+    img.style.objectFit = 'contain';
+    origBox.appendChild(img);
+
+    // Clear result
+    const resultBox = document.getElementById('result-box');
+    resultBox.innerHTML = `<span class="result-label">Output</span>
+        <div class="result-placeholder">
+            <svg viewBox="0 0 24 24" style="width:40px;height:40px;stroke:var(--hint);fill:none;stroke-width:1;margin-bottom:10px"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <p>Click "Remove Background"</p>
+        </div>`;
+    document.getElementById('dl-btn').style.display = 'none';
+};
+
+// Drag and drop single
+const sdz = document.getElementById('single-dz');
+['dragenter','dragover'].forEach(e => sdz.addEventListener(e, ev => { ev.preventDefault(); sdz.classList.add('drag'); }));
+['dragleave','drop'].forEach(e => sdz.addEventListener(e, ev => {
+    ev.preventDefault(); sdz.classList.remove('drag');
+    if (e === 'drop' && ev.dataTransfer.files[0]) {
+        const inp = document.getElementById('single-file');
+        const dt = new DataTransfer(); dt.items.add(ev.dataTransfer.files[0]); inp.files = dt.files;
+        window.onSingleFile(inp);
+    }
+}));
+
+// Remove background — single
+window.removeBg = async function() {
+    if (!currentFile) return showSingleErr('Please upload an image first.');
+    if (!modelReady) return showSingleErr('AI model abhi load ho raha hai. Thoda wait karo.');
+
+    const btn = document.getElementById('btn-remove');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;margin:0"></div> Processing...';
+    hideSingleErr();
+
+    const resultBox = document.getElementById('result-box');
+    resultBox.innerHTML = `<span class="result-label">Output</span>
+        <div class="processing-overlay">
+            <div class="spinner"></div>
+            <p class="proc-text">AI background remove kar raha hai...<br><small>Pehli baar thoda time lagega</small></p>
+        </div>`;
+
+    try {
+        const imageUrl = URL.createObjectURL(currentFile);
+        const result = await segmenter(imageUrl);
+
+        // Get the mask from segmentation result
+        const mask = result.find(r => r.label !== 'background' || result.length === 1) || result[0];
+
+        // Apply mask to image
+        const canvas = await applyMaskToImage(imageUrl, mask, result);
+
+        resultBox.innerHTML = '<span class="result-label">Output</span>';
+        resultBox.id = 'result-box';
+        canvas.id = 'result-canvas';
+        canvas.style.maxWidth = '100%';
+        canvas.style.maxHeight = '360px';
+        canvas.style.objectFit = 'contain';
+        resultBox.appendChild(canvas);
+
+        // Download button
+        const dlBtn = document.getElementById('dl-btn');
+        dlBtn.style.display = 'flex';
+        dlBtn.onclick = () => {
+            const finalCanvas = compositeWithBg(canvas);
+            finalCanvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url;
+                a.download = 'no-bg-' + currentFile.name.replace(/\.[^.]+$/, '') + '.png';
+                a.click(); URL.revokeObjectURL(url);
+            }, 'image/png');
+        };
+    } catch(err) {
+        console.error(err);
+        resultBox.innerHTML = `<span class="result-label">Output</span><div class="result-placeholder"><p style="color:var(--danger)">Error: ${err.message}</p></div>`;
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 16 16" style="width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 4L4 12M4 4l8 8"/></svg> Remove Background';
+};
+
+// Apply segmentation mask to image canvas
+async function applyMaskToImage(imageUrl, primaryMask, allResults) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+
+            // Create mask canvas from segmentation
+            const maskCanvas = document.createElement('canvas');
+            maskCanvas.width = img.width;
+            maskCanvas.height = img.height;
+            const maskCtx = maskCanvas.getContext('2d');
+
+            // Find background masks and invert
+            const bgLabels = ['background', 'Background', 'BG'];
+            const bgMasks = allResults.filter(r => bgLabels.some(l => r.label.toLowerCase().includes(l.toLowerCase())));
+            const fgMasks = allResults.filter(r => !bgLabels.some(l => r.label.toLowerCase().includes(l.toLowerCase())));
+
+            // Use the mask data from transformers.js
+            // The mask is a tensor with values 0-1
+            let maskData;
+
+            if (primaryMask && primaryMask.mask) {
+                maskData = primaryMask.mask;
+            }
+
+            if (maskData) {
+                // Create mask image
+                const maskImg = new Image();
+                maskImg.onload = () => {
+                    maskCtx.drawImage(maskImg, 0, 0, img.width, img.height);
+                    const maskImageData = maskCtx.getImageData(0, 0, img.width, img.height);
+                    const maskPixels = maskImageData.data;
+
+                    // Determine if this is foreground or background mask
+                    const isBgMask = bgLabels.some(l => primaryMask.label.toLowerCase().includes(l.toLowerCase()));
+
+                    for (let i = 0; i < data.length; i += 4) {
+                        const maskVal = maskPixels[i]; // R channel = grayscale value
+                        // If background mask: make bg pixels transparent
+                        // If foreground mask: keep fg pixels, make rest transparent
+                        const alpha = isBgMask
+                            ? (maskVal < 128 ? 255 : 0)
+                            : (maskVal > 128 ? 255 : 0);
+                        data[i + 3] = alpha;
+                    }
+
+                    ctx.putImageData(imageData, 0, 0);
+                    resolve(canvas);
+                };
+                maskImg.onerror = () => resolve(canvas); // fallback
+
+                // Convert mask to data URL
+                if (typeof maskData === 'string') {
+                    maskImg.src = maskData;
+                } else if (maskData.url) {
+                    maskImg.src = maskData.url;
+                } else {
+                    // Tensor data — convert manually
+                    const mCanvas = document.createElement('canvas');
+                    const mW = maskData.dims ? maskData.dims[1] : img.width;
+                    const mH = maskData.dims ? maskData.dims[0] : img.height;
+                    mCanvas.width = mW; mCanvas.height = mH;
+                    const mCtx = mCanvas.getContext('2d');
+                    const mData = mCtx.createImageData(mW, mH);
+                    const raw = maskData.data || maskData;
+                    for (let i = 0; i < raw.length; i++) {
+                        const v = Math.round(raw[i] * 255);
+                        mData.data[i*4] = v;
+                        mData.data[i*4+1] = v;
+                        mData.data[i*4+2] = v;
+                        mData.data[i*4+3] = 255;
+                    }
+                    mCtx.putImageData(mData, 0, 0);
+                    maskImg.src = mCanvas.toDataURL();
+                }
+            } else {
+                resolve(canvas);
+            }
+        };
+        img.onerror = reject;
+        img.src = imageUrl;
+    });
+}
+
+// Composite processed canvas with background choice
+function compositeWithBg(srcCanvas) {
+    const out = document.createElement('canvas');
+    out.width = srcCanvas.width;
+    out.height = srcCanvas.height;
+    const ctx = out.getContext('2d');
+
+    const type = document.getElementById('bg-type').value;
+    if (type === 'white') {
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, out.width, out.height);
+    } else if (type === 'black') {
+        ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, out.width, out.height);
+    } else if (type === 'color') {
+        ctx.fillStyle = bgColor; ctx.fillRect(0, 0, out.width, out.height);
+    }
+    // transparent = no fill
+
+    ctx.drawImage(srcCanvas, 0, 0);
+    return out;
+}
+
+function applyBackground() {
+    const rc = document.getElementById('result-canvas');
+    if (!rc) return;
+}
+
+// Batch mode
+window.onBatchFiles = function(input) {
+    batchFiles = [...input.files].filter(f => /\.(jpe?g|png|webp)$/i.test(f.name));
+    document.getElementById('batch-dz').classList.add('has');
+    document.getElementById('batch-dz-label').textContent = `${batchFiles.length} images ready`;
+    renderBatchGrid();
+};
+
+// Drag batch
+const bdz = document.getElementById('batch-dz');
+['dragenter','dragover'].forEach(e => bdz.addEventListener(e, ev => { ev.preventDefault(); bdz.classList.add('drag'); }));
+['dragleave','drop'].forEach(e => bdz.addEventListener(e, ev => {
+    ev.preventDefault(); bdz.classList.remove('drag');
+    if (e === 'drop') {
+        batchFiles = [...ev.dataTransfer.files].filter(f => /\.(jpe?g|png|webp)$/i.test(f.name));
+        if (batchFiles.length) { bdz.classList.add('has'); document.getElementById('batch-dz-label').textContent = `${batchFiles.length} images ready`; renderBatchGrid(); }
+    }
+}));
+
+function renderBatchGrid() {
+    const grid = document.getElementById('batch-grid');
+    batchResults = new Array(batchFiles.length).fill(null);
+    grid.innerHTML = '';
+    batchFiles.forEach((f, i) => {
+        const card = document.createElement('div');
+        card.className = 'thumb-card';
+        card.id = `tc-${i}`;
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(f);
+        card.appendChild(img);
+        const status = document.createElement('div');
+        status.className = 'tc-status';
+        status.id = `ts-${i}`;
+        status.textContent = 'Waiting...';
+        card.appendChild(status);
+        grid.appendChild(card);
+    });
+    document.getElementById('b-total').textContent = batchFiles.length;
+}
+
+window.processBatch = async function() {
+    if (!batchFiles.length) return showBatchErr('Please select images first.');
+    if (!modelReady) return showBatchErr('AI model abhi load ho raha hai. Wait karo.');
+
+    const btn = document.getElementById('btn-batch');
+    btn.disabled = true;
+    batchResults = [];
+    let doneCount = 0;
+
+    for (let i = 0; i < batchFiles.length; i++) {
+        const card = document.getElementById(`tc-${i}`);
+        const statusEl = document.getElementById(`ts-${i}`);
+        statusEl.textContent = 'Processing...';
+        statusEl.style.background = 'rgba(13,17,23,.7)';
+
+        try {
+            const url = URL.createObjectURL(batchFiles[i]);
+            const result = await segmenter(url);
+            const mask = result[0];
+            const canvas = await applyMaskToImage(url, mask, result);
+
+            batchResults[i] = { canvas, name: batchFiles[i].name };
+
+            // Show result in card
+            card.innerHTML = '';
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.objectFit = 'contain';
+            card.appendChild(canvas);
+
+            const doneStatus = document.createElement('div');
+            doneStatus.className = 'tc-status done';
+            doneStatus.innerHTML = '<svg viewBox="0 0 18 18" style="width:18px;height:18px;stroke:var(--success);fill:none;stroke-width:2.5"><path d="M3 9l4 4 8-8"/></svg>';
+            card.appendChild(doneStatus);
+            card.classList.add('done');
+
+            doneCount++;
+            document.getElementById('b-done').textContent = doneCount;
+            document.getElementById('batch-sum').classList.add('vis');
+
+        } catch(err) {
+            console.error(err);
+            const statusEl2 = document.getElementById(`ts-${i}`);
+            if (statusEl2) { statusEl2.textContent = 'Error'; statusEl2.style.background = 'rgba(248,81,73,.2)'; }
+            card.classList.add('error');
+        }
+    }
+
+    btn.disabled = false;
+    if (doneCount > 0) document.getElementById('batch-dl-wrap').style.display = 'block';
+};
+
+window.downloadAllBatch = async function() {
+    // Dynamic import JSZip from CDN
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    document.head.appendChild(script);
+    script.onload = async () => {
+        const zip = new JSZip();
+        const bgTypeBatch = document.getElementById('batch-bg-type').value;
+
+        for (const r of batchResults) {
+            if (!r) continue;
+            const final = document.createElement('canvas');
+            final.width = r.canvas.width; final.height = r.canvas.height;
+            const ctx = final.getContext('2d');
+            if (bgTypeBatch === 'white') { ctx.fillStyle = '#fff'; ctx.fillRect(0,0,final.width,final.height); }
+            ctx.drawImage(r.canvas, 0, 0);
+
+            const blob = await new Promise(res => final.toBlob(res, 'image/png'));
+            const arrayBuffer = await blob.arrayBuffer();
+            zip.file(r.name.replace(/\.[^.]+$/, '') + '_no_bg.png', arrayBuffer);
+        }
+
+        const content = await zip.generateAsync({type:'blob'});
+        const url = URL.createObjectURL(content);
+        const a = document.createElement('a'); a.href = url; a.download = 'backgrounds_removed.zip'; a.click();
+        URL.revokeObjectURL(url);
+    };
+};
+
+// Error helpers
+function showSingleErr(msg) { const el = document.getElementById('single-err'); el.textContent = msg; el.classList.add('vis'); }
+function hideSingleErr() { document.getElementById('single-err').classList.remove('vis'); }
+function showBatchErr(msg) { const el = document.getElementById('batch-err'); el.textContent = msg; el.classList.add('vis'); }
+
+// Start loading model
+loadModel();
+</script>
+</body>
+</html>
