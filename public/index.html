@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ImagePipeline Pro — Free Online Image Tools</title>
-<meta name="description" content="Free online bulk image tools — resize, compress, convert, crop, watermark, remove background and more. No signup required.">
+<title>ImagePipeline Pro - Free Online Image Tools</title>
+<meta name="description" content="Free online bulk image tools. Resize, compress, convert, crop, watermark, remove background and more. No signup required.">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
 <style>
@@ -21,9 +21,10 @@
 .tool-badge{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:600;display:inline-block;margin-top:8px}
 .b-hot{background:rgba(248,81,73,0.12);color:#F85149}
 .b-new{background:var(--accent-dim);color:var(--accent)}
+.b-ai{background:rgba(63,185,80,0.1);color:var(--success)}
 .section-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--hint);margin:36px 0 14px;display:flex;align-items:center;gap:8px}
 .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
-.stats-row{display:flex;gap:32px;justify-content:center;padding:24px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:32px 0}
+.stats-row{display:flex;gap:32px;justify-content:center;padding:24px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:32px 0;flex-wrap:wrap}
 .stat{text-align:center}
 .stat-val{font-size:24px;font-weight:600;color:var(--text)}
 .stat-key{font-size:11px;color:var(--muted);margin-top:2px}
@@ -37,21 +38,21 @@
     <a href="tool-resizer.html">Resizer</a>
     <a href="tool-compress.html">Compress</a>
     <a href="tool-convert.html">Convert</a>
-    <a href="tool-crop.html">Crop</a>
+    <a href="tool-bgremove.html">BG Remover</a>
   </nav>
 </header>
 
 <div class="main">
   <div class="hero">
-    <div class="hero-title">Free Image Tools<br>for <span>Ecommerce & Creators</span></div>
+    <div class="hero-title">Free Image Tools<br>for <span>Ecommerce and Creators</span></div>
     <p class="hero-sub">Bulk resize, compress, convert, crop and watermark hundreds of images at once. No signup. No software. Completely free.</p>
   </div>
 
   <div class="stats-row">
     <div class="stat"><div class="stat-val">500+</div><div class="stat-key">Images per batch</div></div>
-    <div class="stat"><div class="stat-val">8</div><div class="stat-key">Free tools</div></div>
+    <div class="stat"><div class="stat-val">9</div><div class="stat-key">Free tools</div></div>
     <div class="stat"><div class="stat-val">0</div><div class="stat-key">Signup required</div></div>
-    <div class="stat"><div class="stat-val">WebP/JPG/PNG</div><div class="stat-key">Formats supported</div></div>
+    <div class="stat"><div class="stat-val">WebP / JPG / PNG</div><div class="stat-key">Formats supported</div></div>
   </div>
 
   <p class="section-label">All Tools</p>
@@ -63,10 +64,16 @@
       <div class="tool-desc">Resize hundreds of images to any size. Amazon, Shopify, Instagram presets built in.</div>
       <span class="tool-badge b-hot">Most Popular</span>
     </a>
+    <a href="tool-bgremove.html" class="tool-card" style="border-color:rgba(63,185,80,0.2)">
+      <div class="tool-icon" style="background:rgba(63,185,80,0.1)">🪄</div>
+      <div class="tool-name">Background Remover</div>
+      <div class="tool-desc">AI removes image background instantly in your browser. Free, no server, no API key needed.</div>
+      <span class="tool-badge b-ai">AI Powered</span>
+    </a>
     <a href="tool-compress.html" class="tool-card">
       <div class="tool-icon" style="background:rgba(63,185,80,0.1)">🗜️</div>
       <div class="tool-name">Image Compressor</div>
-      <div class="tool-desc">Compress JPG, PNG and WebP images without visible quality loss. Save up to 80%.</div>
+      <div class="tool-desc">Compress JPG, PNG and WebP images without visible quality loss. Save up to 80% file size.</div>
       <span class="tool-badge b-hot">High Traffic</span>
     </a>
     <a href="tool-convert.html" class="tool-card">
@@ -99,12 +106,6 @@
       <div class="tool-desc">Strip GPS location, camera info and all metadata from images before sharing.</div>
       <span class="tool-badge b-new">New</span>
     </a>
-    <a href="tool-bgremove.html" class="tool-card" style="border-color:rgba(248,81,73,0.3)">
-      <div class="tool-icon" style="background:rgba(248,81,73,0.1)">🪄</div>
-      <div class="tool-name">Background Remover</div>
-      <div class="tool-desc">AI removes image background instantly in your browser. Free, no signup, no server needed.</div>
-      <span class="tool-badge b-hot">AI Powered</span>
-    </a>
     <a href="tool-zip.html" class="tool-card">
       <div class="tool-icon" style="background:rgba(227,179,65,0.08)">📦</div>
       <div class="tool-name">ZIP Image Processor</div>
@@ -115,10 +116,10 @@
 </div>
 
 <footer class="footer">
-  ImagePipeline Pro &nbsp;·&nbsp; Free online image tools &nbsp;·&nbsp;
-  <a href="tool-resizer.html">Resizer</a> &nbsp;·&nbsp;
-  <a href="tool-compress.html">Compressor</a> &nbsp;·&nbsp;
-  <a href="tool-convert.html">Converter</a>
+  ImagePipeline Pro · Free online image tools ·
+  <a href="tool-resizer.html">Resizer</a> ·
+  <a href="tool-compress.html">Compressor</a> ·
+  <a href="tool-bgremove.html">BG Remover</a>
 </footer>
 </body>
 </html>

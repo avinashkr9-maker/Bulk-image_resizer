@@ -1,28 +1,69 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EXIF Data Remover — Remove GPS Location from Images Free</title><meta name="description" content="Strip GPS location, camera info and all metadata from images before sharing. Free privacy tool."><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="shared.css"></head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EXIF Data Remover - Remove GPS Location from Images Free</title>
+<meta name="description" content="Strip GPS location, camera info and all metadata from images before sharing. Free privacy tool, no signup.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
 <body>
-<header class="header"><a href="/" class="logo"><div class="logo-icon">⚡</div>ImagePipeline Pro</a><nav class="nav"><a href="/">Home</a><a href="tool-palette.html">Palette</a><a href="tool-exif.html" class="active">EXIF</a><a href="tool-zip.html">ZIP</a></nav></header>
+<header class="header">
+  <a href="/" class="logo"><div class="logo-icon">⚡</div>ImagePipeline Pro</a>
+  <nav class="nav"><a href="/">Home</a><a href="tool-palette.html">Palette</a><a href="tool-exif.html" class="active">EXIF</a><a href="tool-zip.html">ZIP</a><a href="tool-bgremove.html">BG Remover</a></nav>
+</header>
 <div class="main">
-<div class="page-head"><div class="page-title">🔒 EXIF Data Remover</div><div class="page-sub">Strip GPS location, camera model, date and all metadata from your images before sharing online.</div></div>
-<div class="layout2">
-<div>
-<div class="card"><div class="card-title">Upload Images</div>
-<div class="dropzone" id="dz" onclick="document.getElementById('files').click()"><input class="dz-input" type="file" id="files" multiple accept="image/*" onchange="onFiles(this)"><span class="dz-icon">🔒</span><p class="dz-text" id="dz-label">Drop images here or click</p><span class="dz-sub">JPG, PNG, WebP — GPS data will be removed</span></div></div>
-<div class="card"><div class="card-title">Settings</div>
-<div class="field"><span class="label">Output Format</span><select id="fmt"><option value="same">Same as input</option><option value="jpeg">JPEG</option><option value="png">PNG</option><option value="webp">WebP</option></select></div>
-<div class="field"><span class="label">Quality — <span id="q-val">92</span>%</span><input type="range" id="quality" min="70" max="100" value="92" oninput="document.getElementById('q-val').textContent=this.value"></div>
-<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r8);padding:12px;margin-top:4px">
-<p style="font-size:11px;color:var(--muted);line-height:1.7">🛡️ <b style="color:var(--text)">What gets removed:</b><br>GPS coordinates · Camera make/model · Date taken · Software info · Copyright notices · All other metadata</p>
-</div></div></div>
-<div><div class="card">
-<button class="btn" id="btn" onclick="process()"><svg viewBox="0 0 16 16"><path d="M3 8h10M9 5l3 3-3 3"/></svg>Remove EXIF Data</button>
-<div class="prog-wrap" id="prog"><div class="prog-bg"><div class="prog-bar" id="bar"></div></div><div class="prog-text" id="prog-text">Preparing...</div></div>
-<div class="summary" id="sum"><div class="sum-item"><span class="sum-val" id="s-imgs">—</span><span class="sum-key">Images cleaned</span></div></div>
-<div class="err" id="err"></div>
+  <div class="page-head">
+    <div class="page-title">🔒 EXIF Data Remover</div>
+    <div class="page-sub">Strip GPS location, camera model, date taken and all metadata from your images before sharing online.</div>
+  </div>
+  <div class="layout2">
+    <div>
+      <div class="card">
+        <div class="card-title">Upload Images</div>
+        <div class="dropzone" id="dz" onclick="document.getElementById('files').click()">
+          <input class="dz-input" type="file" id="files" multiple accept="image/*" onchange="onFiles(this)">
+          <span class="dz-icon">🔒</span>
+          <p class="dz-text" id="dz-label">Drop images here or click to browse</p>
+          <span class="dz-sub">JPG, PNG, WebP. GPS data will be removed.</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Settings</div>
+        <div class="field"><span class="label">Output Format</span>
+          <select id="fmt"><option value="same">Same as input</option><option value="jpeg">JPEG</option><option value="png">PNG</option><option value="webp">WebP</option></select>
+        </div>
+        <div class="field">
+          <span class="label">Quality - <span id="q-val">92</span>%</span>
+          <input type="range" id="quality" min="70" max="100" value="92" oninput="document.getElementById('q-val').textContent=this.value">
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r8);padding:12px;margin-top:4px">
+          <p style="font-size:11px;color:var(--muted);line-height:1.8">
+            <b style="color:var(--text)">What gets removed:</b><br>
+            GPS coordinates · Camera make and model · Date taken · Software info · Copyright notices · All other metadata
+          </p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <button class="btn" id="btn" onclick="process()"><svg viewBox="0 0 16 16"><path d="M3 8h10M9 5l3 3-3 3"/></svg>Remove EXIF Data</button>
+        <div class="prog-wrap" id="prog"><div class="prog-bg"><div class="prog-bar" id="bar"></div></div><div class="prog-text" id="prog-text">Preparing...</div></div>
+        <div class="summary" id="sum"><div class="sum-item"><span class="sum-val" id="s-imgs">0</span><span class="sum-key">Images cleaned</span></div></div>
+        <div class="err" id="err"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Why Remove EXIF Data?</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.9">
+          <b style="color:var(--text)">Privacy:</b> Photos taken on phones contain GPS coordinates of the exact location where you took them.<br>
+          <b style="color:var(--text)">Ecommerce:</b> Clean images load faster and do not leak product or business location information.<br>
+          <b style="color:var(--text)">Social media:</b> Platforms strip EXIF data anyway. Remove it yourself before uploading.
+        </p>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="card" style="margin-top:16px"><div class="card-title">Why remove EXIF data?</div>
-<p style="font-size:12px;color:var(--muted);line-height:1.8">• <b style="color:var(--text)">Privacy:</b> Photos taken on phones contain GPS coordinates of where you took them<br>• <b style="color:var(--text)">Ecommerce:</b> Clean images load faster and don't leak product location info<br>• <b style="color:var(--text)">Social media:</b> Platforms strip EXIF anyway — do it yourself first</p>
-</div></div></div></div>
-<footer class="footer">ImagePipeline Pro — <a href="/">All Tools</a></footer>
+<footer class="footer">ImagePipeline Pro · <a href="/">All Tools</a></footer>
 <script src="shared.js"></script>
 <script>
 let files=[];
@@ -30,11 +71,13 @@ function onFiles(inp){files=[...inp.files].filter(f=>/\.(jpe?g|png|webp)$/i.test
 ['dragenter','dragover'].forEach(e=>document.getElementById('dz').addEventListener(e,ev=>{ev.preventDefault();document.getElementById('dz').classList.add('drag');}));
 ['dragleave','drop'].forEach(e=>document.getElementById('dz').addEventListener(e,ev=>{ev.preventDefault();document.getElementById('dz').classList.remove('drag');if(e==='drop'){files=[...ev.dataTransfer.files].filter(f=>/\.(jpe?g|png|webp)$/i.test(f.name));if(files.length){document.getElementById('dz').classList.add('has');document.getElementById('dz-label').textContent=`${files.length} images ready`;}}}));
 async function process(){
-  if(!files.length) return showErr('err','Please select images.');
+  if(!files.length) return showErr('err','Please select images first.');
   hideErr('err');setBtn('btn',true);document.getElementById('sum').classList.remove('vis');document.getElementById('prog').classList.add('vis');document.getElementById('bar').style.width='0';
   const jobId='ex-'+Date.now();
   listenSSE(jobId,'bar','prog-text',d=>{document.getElementById('s-imgs').textContent=d.total;document.getElementById('sum').classList.add('vis');setBtn('btn',false);});
   const fd=new FormData();fd.append('jobId',jobId);fd.append('format',document.getElementById('fmt').value);fd.append('quality',document.getElementById('quality').value);files.forEach(f=>fd.append('images',f));
-  try{const res=await fetch('/exif-remove',{method:'POST',body:fd});if(res.ok){triggerDownload(await res.blob(),'clean_images.zip');}else{const e=await res.json().catch(()=>({}));showErr('err',e.error||'Error');setBtn('btn',false);}}catch(e){showErr('err','Connection error');setBtn('btn',false);}
+  try{const res=await fetch('/exif-remove',{method:'POST',body:fd});if(res.ok){triggerDownload(await res.blob(),'clean_images.zip');}else{const e=await res.json().catch(()=>({}));showErr('err',e.error||'An error occurred.');setBtn('btn',false);}}catch(e){showErr('err','Connection error. Please try again.');setBtn('btn',false);}
 }
-</script></body></html>
+</script>
+</body>
+</html>

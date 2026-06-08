@@ -218,7 +218,7 @@ input[type=color]{width:32px;height:32px;border:1px solid var(--border);border-r
 
 <div class="app">
 
-<!-- ══ SIDEBAR — GLOBAL SETTINGS ══ -->
+<!-- ══ SIDEBAR - GLOBAL SETTINGS ══ -->
 <aside class="sidebar">
 
   <div class="sidebar-section">
@@ -227,14 +227,14 @@ input[type=color]{width:32px;height:32px;border:1px solid var(--border);border-r
     <div class="field">
       <span class="label">Format</span>
       <select id="g-format">
-        <option value="webp">WebP — best compression</option>
-        <option value="jpeg">JPEG — universal</option>
-        <option value="png">PNG — lossless</option>
+        <option value="webp">WebP - best compression</option>
+        <option value="jpeg">JPEG - universal</option>
+        <option value="png">PNG - lossless</option>
       </select>
     </div>
 
     <div class="field">
-      <span class="label">Quality — <span id="g-quality-val">90</span>%</span>
+      <span class="label">Quality - <span id="g-quality-val">90</span>%</span>
       <input type="range" id="g-quality" min="50" max="100" step="1" value="90" oninput="document.getElementById('g-quality-val').textContent=this.value">
     </div>
 
@@ -283,15 +283,15 @@ input[type=color]{width:32px;height:32px;border:1px solid var(--border);border-r
   <div class="sidebar-section">
     <div class="sidebar-label">Color Correction</div>
     <div class="field">
-      <span class="label">Brightness — <span id="br-val">1.00</span></span>
+      <span class="label">Brightness - <span id="br-val">1.00</span></span>
       <input type="range" id="g-brightness" min="0.5" max="2" step="0.05" value="1" oninput="document.getElementById('br-val').textContent=parseFloat(this.value).toFixed(2);if(previewImg.src)renderPreview()">
     </div>
     <div class="field">
-      <span class="label">Saturation — <span id="sat-val">1.00</span></span>
+      <span class="label">Saturation - <span id="sat-val">1.00</span></span>
       <input type="range" id="g-saturation" min="0" max="2" step="0.05" value="1" oninput="document.getElementById('sat-val').textContent=parseFloat(this.value).toFixed(2)">
     </div>
     <div class="field">
-      <span class="label">Hue Shift — <span id="hue-val">0</span>°</span>
+      <span class="label">Hue Shift - <span id="hue-val">0</span>°</span>
       <input type="range" id="g-hue" min="-180" max="180" step="1" value="0" oninput="document.getElementById('hue-val').textContent=this.value">
     </div>
   </div>
@@ -327,7 +327,7 @@ input[type=color]{width:32px;height:32px;border:1px solid var(--border);border-r
   <div class="sidebar-section">
     <div class="sidebar-label">Profiles</div>
     <div class="profile-bar">
-      <select id="profile-select"><option value="">— Load a profile —</option></select>
+      <select id="profile-select"><option value="">- Load a profile -</option></select>
       <button onclick="loadProfile()">Load</button>
       <button onclick="deleteProfile()" style="color:var(--danger)">Del</button>
     </div>
@@ -383,11 +383,11 @@ input[type=color]{width:32px;height:32px;border:1px solid var(--border);border-r
           <div class="field" style="margin-bottom:12px">
             <span class="label">Fit Mode</span>
             <select id="auto-fit" onchange="renderPreview()">
-              <option value="contain">Contain — letterbox with bg color</option>
-              <option value="cover">Cover — zoom & crop to fill</option>
-              <option value="fill">Fill — stretch to exact size</option>
-              <option value="inside">Inside — shrink only</option>
-              <option value="outside">Outside — enlarge only</option>
+              <option value="contain">Contain - letterbox with bg color</option>
+              <option value="cover">Cover - zoom & crop to fill</option>
+              <option value="fill">Fill - stretch to exact size</option>
+              <option value="inside">Inside - shrink only</option>
+              <option value="outside">Outside - enlarge only</option>
             </select>
           </div>
           <div class="field" style="margin-bottom:12px">
@@ -462,7 +462,7 @@ input[type=color]{width:32px;height:32px;border:1px solid var(--border);border-r
               <svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="10" rx="1"/><path d="M1 10l4-4 3 3 3-4 4 5"/></svg>
               Live Preview
             </span>
-            <span style="font-size:10px;color:var(--hint)">Simulated — first image</span>
+            <span style="font-size:10px;color:var(--hint)">Simulated - first image</span>
           </div>
           <div class="preview-pair">
             <div class="preview-box"><span>Original</span><img id="prev-before" src="" alt=""></div>
@@ -481,10 +481,10 @@ input[type=color]{width:32px;height:32px;border:1px solid var(--border);border-r
             <div class="prog-text" id="auto-prog-text">Preparing...</div>
           </div>
           <div class="summary" id="auto-sum">
-            <div class="sum-item"><span class="sum-val" id="s-imgs">—</span><span class="sum-key">Images</span></div>
-            <div class="sum-item"><span class="sum-val" id="s-files">—</span><span class="sum-key">Files</span></div>
-            <div class="sum-item"><span class="sum-val" id="s-size">—</span><span class="sum-key">Output Size</span></div>
-            <div class="sum-item"><span class="sum-val" id="s-fmt">—</span><span class="sum-key">Format</span></div>
+            <div class="sum-item"><span class="sum-val" id="s-imgs">-</span><span class="sum-key">Images</span></div>
+            <div class="sum-item"><span class="sum-val" id="s-files">-</span><span class="sum-key">Files</span></div>
+            <div class="sum-item"><span class="sum-val" id="s-size">-</span><span class="sum-key">Output Size</span></div>
+            <div class="sum-item"><span class="sum-val" id="s-fmt">-</span><span class="sum-key">Format</span></div>
           </div>
           <div class="err-msg" id="auto-err"></div>
         </div>
@@ -521,7 +521,7 @@ input[type=color]{width:32px;height:32px;border:1px solid var(--border);border-r
         <div class="card">
           <div class="card-head"><span class="card-title">Scale & Position</span></div>
           <div class="field">
-            <span class="label">Scale — <span id="scale-val">1.00</span>×</span>
+            <span class="label">Scale - <span id="scale-val">1.00</span>×</span>
             <input type="range" id="st-scale" min="0.05" max="4" step="0.01" value="1" oninput="stState.scale=parseFloat(this.value);document.getElementById('scale-val').textContent=stState.scale.toFixed(2);draw()">
           </div>
           <div class="row2">
@@ -557,10 +557,10 @@ input[type=color]{width:32px;height:32px;border:1px solid var(--border);border-r
             <div class="prog-text" id="tmpl-prog-text">Preparing...</div>
           </div>
           <div class="summary" id="tmpl-sum">
-            <div class="sum-item"><span class="sum-val" id="ts-imgs">—</span><span class="sum-key">Images</span></div>
-            <div class="sum-item"><span class="sum-val" id="ts-files">—</span><span class="sum-key">Files</span></div>
-            <div class="sum-item"><span class="sum-val" id="ts-size">—</span><span class="sum-key">Output</span></div>
-            <div class="sum-item"><span class="sum-val" id="ts-fmt">—</span><span class="sum-key">Format</span></div>
+            <div class="sum-item"><span class="sum-val" id="ts-imgs">-</span><span class="sum-key">Images</span></div>
+            <div class="sum-item"><span class="sum-val" id="ts-files">-</span><span class="sum-key">Files</span></div>
+            <div class="sum-item"><span class="sum-val" id="ts-size">-</span><span class="sum-key">Output</span></div>
+            <div class="sum-item"><span class="sum-val" id="ts-fmt">-</span><span class="sum-key">Format</span></div>
           </div>
           <div class="err-msg" id="tmpl-err"></div>
         </div>
@@ -784,7 +784,7 @@ function listenSSE(jobId, barId, textId, sumPrefix, btn, onDone) {
     const d = JSON.parse(e.data);
     if (d.done) {
       document.getElementById(barId).style.width = '100%';
-      document.getElementById(textId).textContent = `Done — ${d.total} images processed`;
+      document.getElementById(textId).textContent = `Done - ${d.total} images processed`;
       document.getElementById(sumPrefix+'imgs').textContent = d.total;
       document.getElementById(sumPrefix+'files').textContent = d.totalFiles;
       document.getElementById(sumPrefix+'size').textContent = d.sizeKB >= 1024 ? (d.sizeKB/1024).toFixed(1)+' MB' : d.sizeKB+' KB';
@@ -797,7 +797,7 @@ function listenSSE(jobId, barId, textId, sumPrefix, btn, onDone) {
     } else {
       const pct = d.percent || Math.round((d.current/d.total)*100);
       document.getElementById(barId).style.width = pct+'%';
-      document.getElementById(textId).textContent = `Processing ${d.current} / ${d.total} — ${d.filename}`;
+      document.getElementById(textId).textContent = `Processing ${d.current} / ${d.total} - ${d.filename}`;
     }
   };
   es.onerror = () => es.close();
@@ -1090,7 +1090,7 @@ function deleteProfile() {
 function refreshProfileSelect() {
   const sel = document.getElementById('profile-select');
   const profiles = getProfiles();
-  sel.innerHTML = '<option value="">— Load a profile —</option>' +
+  sel.innerHTML = '<option value="">- Load a profile -</option>' +
     Object.keys(profiles).map(n => `<option value="${n}">${n}</option>`).join('');
 }
 

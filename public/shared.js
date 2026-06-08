@@ -2,8 +2,8 @@ function listenSSE(jobId,barId,textId,onDone){
   const es=new EventSource(`/progress/${jobId}`);
   es.onmessage=e=>{
     const d=JSON.parse(e.data);
-    if(d.done){document.getElementById(barId).style.width='100%';document.getElementById(textId).textContent=`Done — ${d.total} images processed`;es.close();onDone(d);}
-    else{document.getElementById(barId).style.width=(d.percent||0)+'%';document.getElementById(textId).textContent=`Processing ${d.current}/${d.total} — ${d.filename}`;}
+    if(d.done){document.getElementById(barId).style.width='100%';document.getElementById(textId).textContent=`Done - ${d.total} images processed`;es.close();onDone(d);}
+    else{document.getElementById(barId).style.width=(d.percent||0)+'%';document.getElementById(textId).textContent=`Processing ${d.current}/${d.total} - ${d.filename}`;}
   };
   es.onerror=()=>es.close();
 }
