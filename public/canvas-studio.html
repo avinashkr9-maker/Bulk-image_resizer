@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Canvas Studio - ImagePipeline Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D1117;--surface:#161B22;--surface2:#21262D;--border:#30363D;
+  --accent:#7C6FF7;--success:#3FB950;--warn:#E3B341;--danger:#F85149;
+  --text:#E6EDF3;--muted:#8B949E;--hint:#484F58;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:rgba(13,17,23,0.96);position:sticky;top:0;z-index:100}
+.logo{font-weight:600;font-size:15px;display:flex;align-items:center;gap:10px}
+.logo-icon{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.app{display:grid;grid-template-columns:1fr 340px;gap:0;height:calc(100vh - 57px)}
+
+/* Canvas area */
+.canvas-area{padding:20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.canvas-wrap{position:relative;background:#111;border:1px solid var(--border);border-radius:12px;overflow:hidden;width:100%;aspect-ratio:1;max-width:600px;margin:0 auto;cursor:grab;user-select:none}
+.canvas-wrap:active{cursor:grabbing}
+canvas{position:absolute;inset:0;width:100%;height:100%}
+.guide{position:absolute;pointer-events:none}
+.g-vc{width:1px;height:100%;left:50%;border-left:1px solid rgba(124,111,247,.4)}
+.g-h1{width:100%;height:1px;top:25%;border-top:1px dashed rgba(63,185,80,.4)}
+.g-h2{width:100%;height:1px;top:80%;border-top:1px dashed rgba(63,185,80,.4)}
+.canvas-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.65);color:var(--muted);font-size:10px;padding:4px 12px;border-radius:20px;white-space:nowrap;pointer-events:none}
+
+/* Info bar above canvas */
+.info-bar{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:11px;color:var(--muted);max-width:600px;margin:0 auto;width:100%}
+.info-bar span{color:var(--text);font-weight:500}
+.info-bar b{color:var(--accent)}
+
+/* Sidebar */
+.sidebar{border-left:1px solid var(--border);overflow-y:auto;background:var(--surface)}
+.sb-section{padding:16px;border-bottom:1px solid var(--border)}
+.sb-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--hint);margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+input[type=number],input[type=text],select{width:100%;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;outline:none;transition:.15s}
+input[type=number]:focus,select:focus{border-color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
+input[type=file]{display:none}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.slider-row{display:flex;align-items:center;gap:8px}
+.slider-val{font-size:12px;font-weight:500;color:var(--text);min-width:44px;text-align:right;font-variant-numeric:tabular-nums}
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-bottom:8px}
+.tog-label{font-size:12px;color:var(--text)}
+.sw{position:relative;width:34px;height:18px;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0}
+.sw-track{position:absolute;inset:0;background:var(--border);border-radius:18px;cursor:pointer;transition:.2s}
+.sw-track::before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.2s}
+.sw input:checked+.sw-track{background:var(--accent)}
+.sw input:checked+.sw-track::before{transform:translateX(16px);background:#fff}
+.dz{border:1.5px dashed var(--border);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:.2s;font-size:12px;color:var(--muted)}
+.dz:hover{border-color:var(--accent);color:var(--text)}
+.dz.has{border-color:var(--success);color:var(--success)}
+.btn{width:100%;padding:11px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-weight:600;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{opacity:.9}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.prog-wrap{display:none;flex-direction:column;gap:6px;margin-top:10px}
+.prog-wrap.vis{display:flex}
+.prog-bg{height:4px;background:var(--border);border-radius:4px;overflow:hidden}
+.prog-bar{height:100%;background:var(--accent);border-radius:4px;transition:width .3s;width:0}
+.prog-text{font-size:11px;color:var(--muted)}
+.summary{display:none;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.2);border-radius:8px;padding:12px;gap:14px;flex-wrap:wrap;margin-top:10px}
+.summary.vis{display:flex}
+.sum-item .sum-val{font-size:15px;font-weight:600;color:var(--success)}
+.sum-item .sum-key{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.err{font-size:11px;color:var(--danger);margin-top:8px;display:none}
+.err.vis{display:block}
+.reset-btn{padding:6px 12px;background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;transition:.15s}
+.reset-btn:hover{border-color:var(--danger);color:var(--danger)}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo"><div class="logo-icon">⚡</div>ImagePipeline Pro - Canvas Studio</div>
+  <a href="/" style="font-size:12px;color:var(--muted);text-decoration:none">Back to all tools</a>
+</header>
+
+<div class="app">
+
+  <!-- LEFT: Canvas -->
+  <div class="canvas-area">
+
+    <div class="info-bar" id="info-bar">
+      <div>Canvas: <b id="info-canvas">500 x 500 px</b></div>
+      <div>Output: <b id="info-output">1080 x 1080 px</b></div>
+      <div>Scale: <b id="info-scale">1.00x</b></div>
+      <div>Position: <b id="info-pos">0, 0</b></div>
+      <div style="margin-left:auto">
+        <button class="reset-btn" onclick="resetPosition()">Reset Position</button>
+      </div>
+    </div>
+
+    <div class="canvas-wrap" id="canvas-wrap">
+      <canvas id="studioCanvas"></canvas>
+      <div class="guide g-vc"></div>
+      <div class="guide g-h1"></div>
+      <div class="guide g-h2"></div>
+      <div class="canvas-hint" id="canvas-hint">Load a reference image to begin</div>
+    </div>
+
+    <!-- Help text -->
+    <div style="max-width:600px;margin:0 auto;width:100%;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+      <div style="font-size:11px;color:var(--muted);line-height:1.8">
+        <b style="color:var(--text)">How to use Canvas Studio:</b><br>
+        1. Load one reference image and position it exactly where you want on the canvas.<br>
+        2. Use the Scale slider or mouse wheel to zoom in or out.<br>
+        3. Drag the image to position it - guides show center, collar and hem lines.<br>
+        4. Select your target folder and click Render Batch.<br>
+        5. All images in the folder will use the exact same position and scale.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: Sidebar -->
+  <div class="sidebar">
+
+    <!-- Step 1: Reference image -->
+    <div class="sb-section">
+      <div class="sb-label">Step 1 - Reference Image</div>
+      <div class="dz" id="ref-dz" onclick="document.getElementById('ref-file').click()">
+        <input type="file" id="ref-file" accept="image/*" onchange="loadReference(this)">
+        <div id="ref-label">Click to load one sample image</div>
+        <div style="font-size:10px;margin-top:4px;color:var(--hint)">JPG, PNG, WebP</div>
+      </div>
+    </div>
+
+    <!-- Step 2: Adjust position -->
+    <div class="sb-section">
+      <div class="sb-label">Step 2 - Adjust Position</div>
+
+      <div class="field">
+        <span class="label">Scale - <span id="scale-val">1.00</span>x</span>
+        <div class="slider-row">
+          <input type="range" id="scale-slider" min="0.05" max="5" step="0.01" value="1" oninput="onScaleSlider(this.value)">
+        </div>
+      </div>
+
+      <div class="row2" style="margin-bottom:10px">
+        <div class="field">
+          <span class="label">X Offset (px)</span>
+          <input type="number" id="offset-x-input" value="0" oninput="onOffsetInput()">
+        </div>
+        <div class="field">
+          <span class="label">Y Offset (px)</span>
+          <input type="number" id="offset-y-input" value="0" oninput="onOffsetInput()">
+        </div>
+      </div>
+
+      <div class="tog-row">
+        <span class="tog-label">Mirror Image (Flip Horizontal)</span>
+        <label class="sw"><input type="checkbox" id="flip-toggle" onchange="draw()"><span class="sw-track"></span></label>
+      </div>
+    </div>
+
+    <!-- Step 3: Output settings -->
+    <div class="sb-section">
+      <div class="sb-label">Step 3 - Output Settings</div>
+
+      <div class="row2">
+        <div class="field">
+          <span class="label">Output Width</span>
+          <input type="number" id="out-w" value="1080" oninput="updateInfoBar()">
+        </div>
+        <div class="field">
+          <span class="label">Output Height</span>
+          <input type="number" id="out-h" value="1080" oninput="updateInfoBar()">
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="label">Export Format</span>
+        <select id="format">
+          <option value="webp">WebP - smallest size</option>
+          <option value="jpeg">JPEG - universal</option>
+          <option value="png">PNG - lossless</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label">Quality - <span id="quality-val">90</span>%</span>
+        <input type="range" id="quality" min="50" max="100" value="90" oninput="document.getElementById('quality-val').textContent=this.value">
+      </div>
+
+      <div class="tog-row">
+        <span class="tog-label">Multi-Resolution (Large / Base / Thumb)</span>
+        <label class="sw"><input type="checkbox" id="multires"><span class="sw-track"></span></label>
+      </div>
+
+      <div class="tog-row" style="margin-bottom:0">
+        <span class="tog-label">Micro-Sharpening</span>
+        <label class="sw"><input type="checkbox" id="sharpen" checked><span class="sw-track"></span></label>
+      </div>
+    </div>
+
+    <!-- Step 4: Target folder -->
+    <div class="sb-section">
+      <div class="sb-label">Step 4 - Apply to Folder</div>
+      <div class="dz" id="folder-dz" onclick="document.getElementById('folder-files').click()">
+        <input type="file" id="folder-files" webkitdirectory directory multiple accept="image/*" onchange="onFolderSelect(this)">
+        <div id="folder-label">Click to select target folder</div>
+        <div style="font-size:10px;margin-top:4px;color:var(--hint)">All images will use same canvas position</div>
+      </div>
+    </div>
+
+    <!-- Render button -->
+    <div class="sb-section">
+      <button class="btn" id="btn-render" onclick="render()">
+        <svg viewBox="0 0 16 16"><path d="M3 8h10M9 5l3 3-3 3"/></svg>
+        Render Batch
+      </button>
+      <div class="prog-wrap" id="prog">
+        <div class="prog-bg"><div class="prog-bar" id="prog-bar"></div></div>
+        <div class="prog-text" id="prog-text">Preparing...</div>
+      </div>
+      <div class="summary" id="summary">
+        <div class="sum-item"><div class="sum-val" id="s-imgs">0</div><div class="sum-key">Images</div></div>
+        <div class="sum-item"><div class="sum-val" id="s-files">0</div><div class="sum-key">Files</div></div>
+        <div class="sum-item"><div class="sum-val" id="s-size">0</div><div class="sum-key">Output Size</div></div>
+      </div>
+      <div class="err" id="err"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── State ──
+const state = {
+    scale: 1,
+    offsetX: 0,  // in canvas pixels
+    offsetY: 0,  // in canvas pixels
+    isDragging: false,
+    dragStartX: 0,
+    dragStartY: 0
+};
+
+const refImg = new Image();
+let refLoaded = false;
+let folderFiles = [];
+
+// ── Canvas setup ──
+const canvas = document.getElementById('studioCanvas');
+const ctx = canvas.getContext('2d');
+
+function setupCanvas() {
+    const wrap = document.getElementById('canvas-wrap');
+    const size = Math.min(wrap.clientWidth, wrap.clientHeight);
+    canvas.width = size;
+    canvas.height = size;
+    draw();
+    updateInfoBar();
+}
+
+window.addEventListener('resize', setupCanvas);
+setTimeout(setupCanvas, 50);
+
+// ── Draw ──
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!refLoaded) return;
+
+    const drawW = refImg.naturalWidth * state.scale;
+    const drawH = refImg.naturalHeight * state.scale;
+
+    // Center + offset
+    const x = (canvas.width - drawW) / 2 + state.offsetX;
+    const y = (canvas.height - drawH) / 2 + state.offsetY;
+
+    ctx.save();
+    if (document.getElementById('flip-toggle').checked) {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(refImg, canvas.width - x - drawW, y, drawW, drawH);
+    } else {
+        ctx.drawImage(refImg, x, y, drawW, drawH);
+    }
+    ctx.restore();
+
+    updateInfoBar();
+    syncInputs();
+}
+
+// ── Update info bar ──
+function updateInfoBar() {
+    const outW = parseInt(document.getElementById('out-w').value) || 1080;
+    const outH = parseInt(document.getElementById('out-h').value) || 1080;
+    document.getElementById('info-canvas').textContent = `${canvas.width} x ${canvas.height} px`;
+    document.getElementById('info-output').textContent = `${outW} x ${outH} px`;
+    document.getElementById('info-scale').textContent = state.scale.toFixed(2) + 'x';
+    document.getElementById('info-pos').textContent = `${Math.round(state.offsetX)}, ${Math.round(state.offsetY)}`;
+}
+
+function syncInputs() {
+    document.getElementById('scale-val').textContent = state.scale.toFixed(2);
+    document.getElementById('scale-slider').value = state.scale;
+    document.getElementById('offset-x-input').value = Math.round(state.offsetX);
+    document.getElementById('offset-y-input').value = Math.round(state.offsetY);
+}
+
+// ── Load reference ──
+window.loadReference = function(input) {
+    if (!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        refImg.src = e.target.result;
+        refImg.onload = () => {
+            refLoaded = true;
+            // Auto-fit image to canvas
+            state.scale = Math.min(
+                (canvas.width * 0.85) / refImg.naturalWidth,
+                (canvas.height * 0.85) / refImg.naturalHeight
+            );
+            state.offsetX = 0;
+            state.offsetY = 0;
+            draw();
+            document.getElementById('ref-dz').classList.add('has');
+            document.getElementById('ref-label').textContent = input.files[0].name;
+            document.getElementById('canvas-hint').style.display = 'none';
+        };
+    };
+    reader.readAsDataURL(input.files[0]);
+};
+
+// ── Scale slider ──
+window.onScaleSlider = function(val) {
+    state.scale = parseFloat(val);
+    draw();
+};
+
+// ── Offset inputs ──
+window.onOffsetInput = function() {
+    state.offsetX = parseFloat(document.getElementById('offset-x-input').value) || 0;
+    state.offsetY = parseFloat(document.getElementById('offset-y-input').value) || 0;
+    draw();
+};
+
+// ── Reset ──
+window.resetPosition = function() {
+    if (!refLoaded) return;
+    state.scale = Math.min(
+        (canvas.width * 0.85) / refImg.naturalWidth,
+        (canvas.height * 0.85) / refImg.naturalHeight
+    );
+    state.offsetX = 0;
+    state.offsetY = 0;
+    draw();
+};
+
+// ── Mouse drag ──
+canvas.addEventListener('mousedown', e => {
+    state.isDragging = true;
+    state.dragStartX = e.clientX - state.offsetX;
+    state.dragStartY = e.clientY - state.offsetY;
+    canvas.style.cursor = 'grabbing';
+});
+window.addEventListener('mouseup', () => {
+    state.isDragging = false;
+    canvas.style.cursor = 'grab';
+});
+window.addEventListener('mousemove', e => {
+    if (!state.isDragging) return;
+    state.offsetX = e.clientX - state.dragStartX;
+    state.offsetY = e.clientY - state.dragStartY;
+    draw();
+});
+
+// ── Touch drag ──
+canvas.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    state.isDragging = true;
+    state.dragStartX = t.clientX - state.offsetX;
+    state.dragStartY = t.clientY - state.offsetY;
+    e.preventDefault();
+}, {passive:false});
+canvas.addEventListener('touchend', () => state.isDragging = false);
+canvas.addEventListener('touchmove', e => {
+    if (!state.isDragging) return;
+    const t = e.touches[0];
+    state.offsetX = t.clientX - state.dragStartX;
+    state.offsetY = t.clientY - state.dragStartY;
+    draw();
+    e.preventDefault();
+}, {passive:false});
+
+// ── Scroll to zoom ──
+canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.05 : 0.05;
+    state.scale = Math.max(0.05, Math.min(5, state.scale + delta));
+    draw();
+}, {passive:false});
+
+// ── Folder select ──
+window.onFolderSelect = function(input) {
+    folderFiles = [...input.files].filter(f => /\.(jpe?g|png|webp)$/i.test(f.name));
+    document.getElementById('folder-dz').classList.add('has');
+    document.getElementById('folder-label').textContent = `${folderFiles.length} images selected`;
+};
+
+// ── SSE Progress ──
+function listenSSE(jobId, onDone) {
+    const es = new EventSource(`/progress/${jobId}`);
+    es.onmessage = e => {
+        const d = JSON.parse(e.data);
+        if (d.done) {
+            document.getElementById('prog-bar').style.width = '100%';
+            document.getElementById('prog-text').textContent = `Done - ${d.total} images processed`;
+            document.getElementById('s-imgs').textContent = d.total;
+            document.getElementById('s-files').textContent = d.totalFiles;
+            document.getElementById('s-size').textContent = d.sizeKB >= 1024
+                ? (d.sizeKB/1024).toFixed(1)+' MB' : d.sizeKB+' KB';
+            document.getElementById('summary').classList.add('vis');
+            es.close();
+            onDone();
+        } else {
+            const pct = d.percent || Math.round((d.current/d.total)*100);
+            document.getElementById('prog-bar').style.width = pct + '%';
+            document.getElementById('prog-text').textContent = `Processing ${d.current} of ${d.total} - ${d.filename}`;
+        }
+    };
+    es.onerror = () => es.close();
+}
+
+// ── CORE: Calculate server params correctly ──
+function getServerParams() {
+    const outW = parseInt(document.getElementById('out-w').value) || 1080;
+    const outH = parseInt(document.getElementById('out-h').value) || 1080;
+
+    // Canvas is displayed at CSS size but has actual pixel size canvas.width x canvas.height
+    // We need to convert canvas coordinates to output image coordinates
+
+    // Scale factor: how much bigger is output vs canvas
+    const scaleToOutput = outW / canvas.width;  // assuming square; use outH/canvas.height for non-square
+
+    // Image dimensions on canvas
+    const imgDrawW = refImg.naturalWidth * state.scale;
+    const imgDrawH = refImg.naturalHeight * state.scale;
+
+    // Top-left position of image on canvas
+    const imgX = (canvas.width - imgDrawW) / 2 + state.offsetX;
+    const imgY = (canvas.height - imgDrawH) / 2 + state.offsetY;
+
+    // Convert to output image coordinates
+    // offsetX and offsetY for server = position of image top-left in output pixels
+    const serverOffsetX = imgX * scaleToOutput;
+    const serverOffsetY = imgY * scaleToOutput;
+
+    // Scale in output pixels: how large is the image in output
+    // Server uses: finalWidth = naturalWidth * scale * (outputW/500)
+    // So we need: scale * (outputW/500) * naturalWidth = imgDrawW * scaleToOutput
+    // scale * (outputW/500) = (imgDrawW * scaleToOutput) / naturalWidth
+    // scale = (imgDrawW * scaleToOutput) / naturalWidth / (outputW/500)
+    //       = (imgDrawW * scaleToOutput * 500) / (naturalWidth * outputW)
+    const serverScale = (imgDrawW * scaleToOutput * 500) / (refImg.naturalWidth * outW);
+
+    return {
+        scale: serverScale,
+        offsetX: serverOffsetX,
+        offsetY: serverOffsetY,
+        targetWidth: outW,
+        targetHeight: outH
+    };
+}
+
+// ── Render ──
+window.render = async function() {
+    if (!refLoaded) return showErr('Please load a reference image first.');
+    if (!folderFiles.length) return showErr('Please select a target folder first.');
+    hideErr();
+
+    const btn = document.getElementById('btn-render');
+    btn.dataset.orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<svg viewBox="0 0 16 16" style="width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2;animation:spin 1s linear infinite"><circle cx="8" cy="8" r="6" stroke-dasharray="20 18"/></svg> Rendering...';
+
+    document.getElementById('summary').classList.remove('vis');
+    document.getElementById('prog').classList.add('vis');
+    document.getElementById('prog-bar').style.width = '0';
+
+    const params = getServerParams();
+    const jobId = 'tmpl-' + Date.now();
+
+    listenSSE(jobId, () => {
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.orig;
+    });
+
+    const fd = new FormData();
+    fd.append('jobId', jobId);
+    fd.append('scale', params.scale);
+    fd.append('offsetX', params.offsetX);
+    fd.append('offsetY', params.offsetY);
+    fd.append('targetWidth', params.targetWidth);
+    fd.append('targetHeight', params.targetHeight);
+    fd.append('flip', document.getElementById('flip-toggle').checked);
+    fd.append('format', document.getElementById('format').value);
+    fd.append('quality', document.getElementById('quality').value);
+    fd.append('multiRes', document.getElementById('multires').checked);
+    fd.append('sharpen', document.getElementById('sharpen').checked);
+    fd.append('bgColor', '#ffffff');
+
+    folderFiles.forEach(f => {
+        fd.append('images', f);
+        fd.append('paths', f.webkitRelativePath || f.name);
+    });
+
+    try {
+        const res = await fetch('/process-template', { method: 'POST', body: fd });
+        if (res.ok) {
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'canvas_studio_output.zip';
+            a.click();
+            URL.revokeObjectURL(url);
+        } else {
+            const e = await res.json().catch(() => ({}));
+            showErr(e.error || 'Server error. Please try again.');
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.orig;
+        }
+    } catch (e) {
+        showErr('Connection error. Make sure server is running.');
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.orig;
+    }
+};
+
+function showErr(msg) {
+    const el = document.getElementById('err');
+    el.textContent = msg;
+    el.classList.add('vis');
+}
+function hideErr() {
+    document.getElementById('err').classList.remove('vis');
+}
+</script>
+</body>
+</html>
